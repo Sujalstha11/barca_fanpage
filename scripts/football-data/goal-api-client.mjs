@@ -1,6 +1,10 @@
 const DEFAULT_BASE_URL = 'https://api.goal-api.com/v1'
 const DEFAULT_TIMEOUT_MS = 20_000
-const DEFAULT_PAGE_LIMIT = 500
+// The live service currently rejects a 500-item page on some list endpoints
+// even though the published schema advertises 500 as the maximum. Its
+// documented default of 50 works consistently and is still ample for the
+// small team, fixture, and squad collections this updater requests.
+const DEFAULT_PAGE_LIMIT = 50
 const DEFAULT_MAX_PAGINATION_PAGES = 1_000
 
 function wait(milliseconds) {
@@ -13,9 +17,23 @@ function readHeader(headers, name) {
 
 function errorDetails(body) {
   const providerError = body?.error ?? body?.errors
+  const validationDetails = Array.isArray(body?.details)
+    ? body.details
+        .map((entry) => {
+          if (typeof entry === 'string') return entry
+          const path = entry?.path ? `${entry.path}: ` : ''
+          return entry?.msg ? `${path}${entry.msg}` : null
+        })
+        .filter(Boolean)
+        .join('; ')
+    : null
 
   if (typeof providerError === 'string') {
-    return { message: providerError, code: body?.code ?? null, category: body?.category ?? null }
+    return {
+      message: validationDetails ? `${providerError} (${validationDetails})` : providerError,
+      code: body?.code ?? null,
+      category: body?.category ?? null,
+    }
   }
 
   if (Array.isArray(providerError)) {
@@ -23,14 +41,14 @@ function errorDetails(body) {
       message: providerError
         .map((entry) => typeof entry === 'string' ? entry : entry?.message)
         .filter(Boolean)
-        .join('; '),
+        .join('; ') || validationDetails,
       code: body?.code ?? null,
       category: body?.category ?? null,
     }
   }
 
   return {
-    message: providerError?.message ?? body?.message ?? null,
+    message: providerError?.message ?? body?.message ?? validationDetails,
     code: providerError?.code ?? body?.code ?? null,
     category: providerError?.category ?? providerError?.type ?? body?.category ?? null,
   }

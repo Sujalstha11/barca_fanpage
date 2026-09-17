@@ -7,6 +7,7 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { players } from '../src/data/players.js'
+import { enrichGoalPlayersWithStatistics } from '../scripts/update-football-data.mjs'
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const snapshotPath = path.join(projectRoot, 'src', 'data', 'generated', 'snapshot.json')
@@ -127,13 +128,17 @@ const goalPlayers = snapshot.playerStats.map((stat) => {
     number: player.number,
     type: player.position,
     image: `https://example.test/${stat.playerId}.png`,
+  }
+})
+const goalPerformanceByPlayerId = new Map(snapshot.playerStats.map((stat) => [
+  providerPlayerKey(stat.playerId),
+  {
     matchPlayed: stat.appearances,
-    starts: stat.starts,
     minutes: stat.minutes,
     goals: stat.goals,
     assists: stat.assists,
-  }
-})
+  },
+]))
 
 function lineups() {
   const startingLineups = goalPlayers.slice(0, 11).map((player) => ({
@@ -191,9 +196,11 @@ function barcaStandings() {
   })
 }
 
-async function runUpdater(origin) {
+async function runUpdater(origin, { dryRun = true } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [updaterPath, '--mode', 'full', '--dry-run'], {
+    const argumentsList = [updaterPath, '--mode', 'full']
+    if (dryRun) argumentsList.push('--dry-run')
+    const child = spawn(process.execPath, argumentsList, {
       cwd: projectRoot,
       env: {
         ...process.env,
@@ -216,6 +223,7 @@ async function runUpdater(origin) {
 
 test('full GOAL provider update uses authenticated data and the public UCL fallback without writing in dry-run mode', { timeout: 20_000 }, async (context) => {
   const calls = []
+  let returnIncompletePlayerStatistics = false
   const server = http.createServer((request, response) => {
     const url = new URL(request.url, 'http://127.0.0.1')
     calls.push({
@@ -235,6 +243,14 @@ test('full GOAL provider update uses authenticated data and the public UCL fallb
       body = goalWrapper({ id: 'ucl', apiId: 3, name: 'Champions League' })
     } else if (url.pathname === `/v1/teams/${goalTeam.id}/players`) {
       body = listWrapper(goalPlayers)
+    } else if (/^\/v1\/players\/player-\d+\/statistics$/.test(url.pathname)) {
+      const playerId = url.pathname.split('/')[3]
+      const performance = goalPerformanceByPlayerId.get(playerId)
+      body = goalWrapper({
+        performance: returnIncompletePlayerStatistics
+          ? { ...performance, minutes: null }
+          : performance,
+      })
     } else if (/^\/v1\/fixtures\/fixture-\d+\/lineups$/.test(url.pathname)) {
       body = goalWrapper(lineups())
     } else if (/^\/v1\/fixtures\/fixture-\d+\/events$/.test(url.pathname)) {
@@ -280,7 +296,9 @@ test('full GOAL provider update uses authenticated data and the public UCL fallb
 
   assert.ok(calls.some((call) => call.pathname === '/v1/teams'
     && call.query.search === 'Barcelona'
-    && call.query.country === 'Spain'))
+    && call.query.country === 'Spain'
+    && call.query.isActive === 'true'
+    && call.query.limit === '50'))
   assert.ok(calls.some((call) => call.pathname === '/v1/fixtures'
     && call.query.teamId === goalTeam.id
     && call.query.from === '2026-07-01'
@@ -288,6 +306,11 @@ test('full GOAL provider update uses authenticated data and the public UCL fallb
   assert.ok(calls.some((call) => call.pathname === '/v1/leagues/lal'))
   assert.ok(calls.some((call) => call.pathname === '/v1/leagues/ucl'))
   assert.ok(calls.some((call) => call.pathname === `/v1/teams/${goalTeam.id}/players`))
+  assert.equal(
+    calls.filter((call) => /^\/v1\/players\/player-\d+\/statistics$/.test(call.pathname)).length,
+    goalPlayers.length,
+  )
+  assert.ok(goalCalls.length < 1_000)
   assert.equal(calls.filter((call) => /\/lineups$/.test(call.pathname)).length, snapshot.results.length)
   assert.equal(calls.filter((call) => /\/events$/.test(call.pathname)).length, snapshot.results.length)
   assert.ok(calls.some((call) => call.pathname === '/v1/standings/lal'))
@@ -296,4 +319,47 @@ test('full GOAL provider update uses authenticated data and the public UCL fallb
     pathname: '/api/standings',
     query: { competition: 'UCL', season: '2026' },
   }])
+
+  const beforeFailedSync = await readFile(snapshotPath, 'utf8')
+  returnIncompletePlayerStatistics = true
+  const failedResult = await runUpdater(origin, { dryRun: false })
+  const afterFailedSync = await readFile(snapshotPath, 'utf8')
+  assert.equal(failedResult.code, 1)
+  assert.match(failedResult.stderr, /incomplete performance statistics/)
+  assert.equal(afterFailedSync, beforeFailedSync)
+})
+
+test('player statistics enrichment merges official performance totals and rejects oversized squads before requests', async () => {
+  const rows = [{ id: 'player-one', name: 'Player One', minutes: null }]
+  const endpoints = []
+  const client = {
+    async get(endpoint) {
+      endpoints.push(endpoint)
+      return {
+        data: {
+          performance: { matchPlayed: '4', minutes: '301', goals: '2', assists: 1 },
+        },
+      }
+    },
+  }
+  const enriched = await enrichGoalPlayersWithStatistics(client, rows)
+  assert.deepEqual(enriched, [{
+    id: 'player-one',
+    name: 'Player One',
+    matchPlayed: 4,
+    minutes: 301,
+    goals: 2,
+    assists: 1,
+  }])
+  assert.deepEqual(endpoints, ['players/player-one/statistics'])
+
+  let quotaGuardRequests = 0
+  await assert.rejects(
+    enrichGoalPlayersWithStatistics(
+      { get: async () => { quotaGuardRequests += 1 } },
+      Array.from({ length: 61 }, (_, index) => ({ id: `player-${index}`, name: `Player ${index}` })),
+    ),
+    /above the safe per-sync limit of 60/,
+  )
+  assert.equal(quotaGuardRequests, 0)
 })

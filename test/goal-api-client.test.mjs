@@ -65,7 +65,7 @@ test('GOAL API client handles 204 and empty successful bodies safely', async () 
   assert.deepEqual(await client.get('teams/1/upcoming'), wrapper([]))
 })
 
-test('GOAL API client follows offset pagination with a 500-item limit', async () => {
+test('GOAL API client follows offset pagination with a conservative 50-item limit', async () => {
   const requests = []
   const client = createGoalApiClient({
     apiKey: 'test-secret',
@@ -78,15 +78,15 @@ test('GOAL API client follows offset pagination with a 500-item limit', async ()
         team: url.searchParams.get('team'),
       })
       return offset === 0
-        ? jsonResponse(wrapper(['first'], { total: 501, limit: 500, offset: 0, hasMore: true }))
-        : jsonResponse(wrapper(['last'], { total: 501, limit: 500, offset: 500, hasMore: false }))
+        ? jsonResponse(wrapper(['first'], { total: 51, limit: 50, offset: 0, hasMore: true }))
+        : jsonResponse(wrapper(['last'], { total: 51, limit: 50, offset: 50, hasMore: false }))
     },
   })
 
   assert.deepEqual(await client.getAll('/fixtures', { team: 529, limit: 10 }), ['first', 'last'])
   assert.deepEqual(requests, [
-    { offset: 0, limit: 500, team: '529' },
-    { offset: 500, limit: 500, team: '529' },
+    { offset: 0, limit: 50, team: '529' },
+    { offset: 50, limit: 50, team: '529' },
   ])
 })
 
@@ -96,7 +96,7 @@ test('GOAL API client guards against pagination that cannot make progress', asyn
     baseUrl: 'https://example.test',
     fetchImpl: async () => jsonResponse(wrapper([], {
       total: 2,
-      limit: 500,
+      limit: 50,
       offset: 0,
       hasMore: true,
     })),
@@ -179,6 +179,26 @@ test('GOAL API client never retries 4xx and exposes provider details', async () 
       && error.message.includes('Invalid API key'),
   )
   assert.equal(calls, 1)
+})
+
+test('GOAL API client includes field-level validation details in errors', async () => {
+  const client = createGoalApiClient({
+    apiKey: 'test-secret',
+    baseUrl: 'https://example.test',
+    fetchImpl: async () => jsonResponse({
+      success: false,
+      error: 'Validation failed',
+      code: 'VALIDATION_ERROR',
+      details: [{ path: 'limit', msg: 'Must be less than or equal to 50' }],
+    }, 400),
+  })
+
+  await assert.rejects(
+    client.get('teams'),
+    (error) => error instanceof GoalApiError
+      && error.code === 'VALIDATION_ERROR'
+      && error.message.includes('limit: Must be less than or equal to 50'),
+  )
 })
 
 test('GOAL API client reports invalid JSON without retrying a 4xx response', async () => {

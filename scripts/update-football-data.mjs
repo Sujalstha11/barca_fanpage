@@ -37,6 +37,8 @@ import {
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url))
 const PROJECT_ROOT = path.resolve(SCRIPT_DIRECTORY, '..')
 const SNAPSHOT_PATH = path.join(PROJECT_ROOT, 'src', 'data', 'generated', 'snapshot.json')
+const MAX_GOAL_SQUAD_PLAYERS = 60
+const GOAL_PERFORMANCE_FIELDS = ['matchPlayed', 'minutes', 'goals', 'assists']
 
 function parseArguments(argumentsList) {
   const options = { mode: 'full', dryRun: false, now: new Date() }
@@ -516,6 +518,48 @@ function goalPlayerIndexes(players) {
   return { byProviderId, byProviderKey, byName }
 }
 
+function goalPerformanceTotal(value) {
+  if (value === null || value === undefined || typeof value === 'boolean') return null
+  if (typeof value === 'string' && !value.trim()) return null
+  const total = Number(value)
+  return Number.isInteger(total) && total >= 0 ? total : null
+}
+
+async function enrichGoalPlayersWithStatistics(client, players) {
+  if (!Array.isArray(players)) {
+    throw new Error('GOAL API returned an invalid Barcelona player feed; the current statistics were preserved.')
+  }
+  if (players.length > MAX_GOAL_SQUAD_PLAYERS) {
+    throw new Error(
+      `GOAL API returned ${players.length} Barcelona players, above the safe per-sync limit of ${MAX_GOAL_SQUAD_PLAYERS}; the current statistics were preserved.`,
+    )
+  }
+
+  const enrichedPlayers = []
+  for (const player of players) {
+    const playerId = String(player?.id || '').trim()
+    const playerLabel = String(player?.name || playerId || 'unknown player')
+    if (!playerId) {
+      throw new Error(`GOAL API returned ${playerLabel} without a player id; the current statistics were preserved.`)
+    }
+
+    const body = await client.get(`players/${encodeURIComponent(playerId)}/statistics`)
+    const performance = body.data?.performance
+    const totals = Object.fromEntries(GOAL_PERFORMANCE_FIELDS.map((field) => [
+      field,
+      goalPerformanceTotal(performance?.[field]),
+    ]))
+    if (GOAL_PERFORMANCE_FIELDS.some((field) => totals[field] === null)) {
+      throw new Error(
+        `GOAL API returned incomplete performance statistics for ${playerLabel}; the current statistics were preserved.`,
+      )
+    }
+
+    enrichedPlayers.push({ ...player, ...totals })
+  }
+  return enrichedPlayers
+}
+
 function lineupPlayerId(entry, indexes) {
   const byKey = indexes.byProviderKey.get(String(entry?.playerId || ''))
   if (byKey) return byKey
@@ -690,6 +734,7 @@ async function buildGoalCandidate({ snapshot, runtimeConfig, options, checkedAt 
   if (goalPlayers.length === 0 && previousPlayerStats.length > 0) {
     throw new Error('GOAL API returned an empty Barcelona player feed; the current statistics were preserved.')
   }
+  goalPlayers = await enrichGoalPlayersWithStatistics(client, goalPlayers)
   const startsByProviderId = await loadGoalStarts(client, relevantRawFixtures, team, goalPlayers)
   const primaryLeagueId = competitions.find((competition) => competition.id === 'la-liga')?.providerLeagueId
     || competitions[0].providerLeagueId
@@ -1024,7 +1069,12 @@ async function main() {
   reportRequestCount(client)
 }
 
-export { assertCompleteSeasonResponse, assertFreshPlayerStats, assertFreshStandings }
+export {
+  assertCompleteSeasonResponse,
+  assertFreshPlayerStats,
+  assertFreshStandings,
+  enrichGoalPlayersWithStatistics,
+}
 
 if (path.resolve(process.argv[1] || '') === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
