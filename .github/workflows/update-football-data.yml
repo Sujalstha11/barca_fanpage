@@ -1,6 +1,11 @@
 name: Update football data
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/update-football-data.yml'
   schedule:
     # Offset from the top of the hour to reduce scheduler congestion.
     - cron: '7,37 * * * *'
@@ -51,6 +56,8 @@ jobs:
         run: |
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
             mode="$DISPATCH_MODE"
+          elif [[ "$EVENT_NAME" == "push" ]]; then
+            mode="full"
           elif [[ "$EVENT_SCHEDULE" == "23 4 * * *" ]]; then
             mode="full"
           else
