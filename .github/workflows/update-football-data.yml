@@ -1,0 +1,114 @@
+name: Update football data
+
+on:
+  schedule:
+    # Offset from the top of the hour to reduce scheduler congestion.
+    - cron: '7,37 * * * *'
+    - cron: '23 4 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Update mode
+        required: true
+        default: full
+        type: choice
+        options:
+          - full
+          - scheduled
+
+permissions:
+  contents: write
+
+concurrency:
+  group: football-data-update-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Select update mode
+        id: update-mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+          DISPATCH_MODE: ${{ inputs.mode }}
+        run: |
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            mode="$DISPATCH_MODE"
+          elif [[ "$EVENT_SCHEDULE" == "23 4 * * *" ]]; then
+            mode="full"
+          else
+            mode="scheduled"
+          fi
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+
+      - name: Run selected update
+        id: update
+        shell: bash
+        env:
+          API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
+          API_FOOTBALL_SEASON: ${{ vars.API_FOOTBALL_SEASON || '2026' }}
+          UPDATE_MODE: ${{ steps.update-mode.outputs.mode }}
+        run: |
+          if [[ "$UPDATE_MODE" == "full" ]]; then
+            npm run data:update
+          else
+            npm run data:update:scheduled
+          fi
+
+          if git diff --quiet -- src/data/generated/snapshot.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install dependencies
+        if: steps.update.outputs.changed == 'true'
+        run: npm ci
+
+      - name: Validate generated data
+        if: steps.update.outputs.changed == 'true'
+        run: npm run data:validate
+
+      - name: Run tests
+        if: steps.update.outputs.changed == 'true'
+        run: npm test
+
+      - name: Lint source
+        if: steps.update.outputs.changed == 'true'
+        run: npm run lint
+
+      - name: Build site
+        if: steps.update.outputs.changed == 'true'
+        run: npm run build
+
+      - name: Commit generated snapshot and build
+        if: steps.update.outputs.changed == 'true'
+        shell: bash
+        run: |
+          git add -- src/data/generated/snapshot.json dist
+          if git diff --cached --quiet; then
+            echo "Generated data and build are unchanged."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(data): refresh football data"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

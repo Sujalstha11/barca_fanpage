@@ -1,157 +1,123 @@
-export const results = [
-  {
-    id: 'levante-fcb-2026',
-    date: '2026-09-13',
-    home: 'Levante',
-    homeCode: 'LEV',
-    away: 'Barcelona',
-    awayCode: 'BAR',
-    homeScore: 2,
-    awayScore: 4,
-    venue: 'Ciutat de Valencia',
-    competition: 'La Liga',
-    round: 'Matchday 5',
-    goals: [
-      { teamCode: 'BAR', minute: '5', scorer: 'Xavi Espart', scorerId: 7, assist: 'Raphinha', assistId: 22, type: 'goal' },
-      { teamCode: 'BAR', minute: '19', scorer: 'Lamine Yamal', scorerId: 21, assist: 'Raphinha', assistId: 22, type: 'goal' },
-      { teamCode: 'BAR', minute: '48', scorer: 'Lamine Yamal', scorerId: 21, assist: null, assistId: null, type: 'penalty' },
-      { teamCode: 'LEV', minute: '79', scorer: 'Iván Romero', scorerId: null, assist: null, assistId: null, type: 'goal' },
-      { teamCode: 'LEV', minute: '88', scorer: 'Roger Brugué', scorerId: null, assist: null, assistId: null, type: 'goal' },
-      { teamCode: 'BAR', minute: '90+3', scorer: 'Karim Adeyemi', scorerId: 23, assist: 'Marc Bernal', assistId: 19, type: 'goal' },
-    ],
-  },
-  {
-    id: 'fcb-feyenoord-2026',
-    date: '2026-09-09',
-    home: 'Barcelona',
-    homeCode: 'BAR',
-    away: 'Feyenoord',
-    awayCode: 'FEY',
-    homeScore: 5,
-    awayScore: 1,
-    venue: 'Spotify Camp Nou',
-    competition: 'Champions League',
-    round: 'League phase · Matchday 1',
-    goals: [
-      { teamCode: 'BAR', minute: '3', scorer: 'Raphinha', scorerId: 22, assist: 'Lamine Yamal', assistId: 21, type: 'goal' },
-      { teamCode: 'BAR', minute: '22', scorer: 'Karim Adeyemi', scorerId: 23, assist: 'João Cancelo', assistId: 4, type: 'goal' },
-      { teamCode: 'BAR', minute: '57', scorer: 'Raphinha', scorerId: 22, assist: 'Pedri', assistId: 15, type: 'goal' },
-      { teamCode: 'BAR', minute: '77', scorer: 'Lamine Yamal', scorerId: 21, assist: null, assistId: null, type: 'free-kick' },
-      { teamCode: 'FEY', minute: '82', scorer: 'Sem Steijn', scorerId: null, assist: 'Gonçalo Borges', assistId: null, type: 'goal' },
-      { teamCode: 'BAR', minute: '85', scorer: 'Gabriel Jesus', scorerId: 20, assist: 'Lamine Yamal', assistId: 21, type: 'goal' },
-    ],
-  },
-  {
-    id: 'valencia-fcb-2026',
-    date: '2026-09-06',
-    home: 'Valencia',
-    homeCode: 'VAL',
-    away: 'Barcelona',
-    awayCode: 'BAR',
-    homeScore: 0,
-    awayScore: 5,
-    venue: 'Mestalla',
-    competition: 'La Liga',
-    round: 'Matchday 4',
-    goals: [
-      { teamCode: 'BAR', minute: '6', scorer: 'Lamine Yamal', scorerId: 21, assist: 'Fermín López', assistId: 14, type: 'goal' },
-      { teamCode: 'BAR', minute: '22', scorer: 'Fermín López', scorerId: 14, assist: 'Anthony Gordon', assistId: 24, type: 'goal' },
-      { teamCode: 'BAR', minute: '50', scorer: 'Raphinha', scorerId: 22, assist: 'Fermín López', assistId: 14, type: 'goal' },
-      { teamCode: 'BAR', minute: '79', scorer: 'Pedri', scorerId: 15, assist: 'Dani Olmo', assistId: 17, type: 'goal' },
-      { teamCode: 'BAR', minute: '84', scorer: 'Lamine Yamal', scorerId: 21, assist: 'Dani Olmo', assistId: 17, type: 'goal' },
-    ],
-  },
-  {
-    id: 'fcb-rayo-2026',
-    date: '2026-08-31',
-    home: 'Barcelona',
-    homeCode: 'BAR',
-    away: 'Rayo Vallecano',
-    awayCode: 'RAY',
-    homeScore: 5,
-    awayScore: 2,
-    venue: 'Spotify Camp Nou',
-    competition: 'La Liga',
-    round: 'Matchday 3',
-    goals: [
-      { teamCode: 'RAY', minute: '12', scorer: 'Sergio Camello', scorerId: null, assist: 'Álvaro García', assistId: null, type: 'goal' },
-      { teamCode: 'BAR', minute: '19', scorer: 'Raphinha', scorerId: 22, assist: 'Xavi Espart', assistId: 7, type: 'goal' },
-      { teamCode: 'BAR', minute: '21', scorer: 'Lamine Yamal', scorerId: 21, assist: 'Marc Bernal', assistId: 19, type: 'goal' },
-      { teamCode: 'BAR', minute: '51', scorer: 'Florian Lejeune', scorerId: null, assist: null, assistId: null, type: 'own-goal' },
-      { teamCode: 'RAY', minute: '59', scorer: 'Sergio Camello', scorerId: null, assist: 'Unai López', assistId: null, type: 'goal' },
-      { teamCode: 'BAR', minute: '71', scorer: 'Raphinha', scorerId: 22, assist: 'Anthony Gordon', assistId: 24, type: 'goal' },
-      { teamCode: 'BAR', minute: '90', scorer: 'Lamine Yamal', scorerId: 21, assist: 'Karim Adeyemi', assistId: 23, type: 'goal' },
-    ],
-  },
-  {
-    id: 'fcb-athletic-2026',
-    date: '2026-08-27',
-    home: 'Barcelona',
-    homeCode: 'BAR',
-    away: 'Athletic Club',
-    awayCode: 'ATH',
-    homeScore: 2,
-    awayScore: 0,
-    venue: 'Spotify Camp Nou',
-    competition: 'La Liga',
-    round: 'Matchday 1',
-    goals: [
-      { teamCode: 'BAR', minute: '37', scorer: 'Raphinha', scorerId: 22, assist: 'Pedri', assistId: 15, type: 'goal' },
-      { teamCode: 'BAR', minute: '82', scorer: 'Fermín López', scorerId: 14, assist: null, assistId: null, type: 'goal' },
-    ],
-  },
-  {
-    id: 'elche-fcb-2026',
-    date: '2026-08-23',
-    home: 'Elche',
-    homeCode: 'ELC',
-    away: 'Barcelona',
-    awayCode: 'BAR',
-    homeScore: 0,
-    awayScore: 5,
-    venue: 'Martínez Valero',
-    competition: 'La Liga',
-    round: 'Matchday 2',
-    goals: [
-      { teamCode: 'BAR', minute: '14', scorer: 'Raphinha', scorerId: 22, assist: null, assistId: null, type: 'penalty' },
-      { teamCode: 'BAR', minute: '45+3', scorer: 'Karim Adeyemi', scorerId: 23, assist: 'Raphinha', assistId: 22, type: 'goal' },
-      { teamCode: 'BAR', minute: '67', scorer: 'Raphinha', scorerId: 22, assist: 'Anthony Gordon', assistId: 24, type: 'goal' },
-      { teamCode: 'BAR', minute: '71', scorer: 'Fermín López', scorerId: 14, assist: 'Anthony Gordon', assistId: 24, type: 'goal' },
-      { teamCode: 'BAR', minute: '79', scorer: 'Fermín López', scorerId: 14, assist: 'Xavi Espart', assistId: 7, type: 'goal' },
-    ],
-  },
-]
+import { players as localPlayers } from './players.js'
+import snapshot, { formatSnapshotMatchDate, snapshotCheckedAt } from './snapshot.js'
 
-export const resultSummary = {
-  played: 6,
-  wins: 6,
-  draws: 0,
-  losses: 0,
-  goalsFor: 26,
-  goalsAgainst: 5,
-  cleanSheets: 3,
+function resultTime(result) {
+  const timestamp = Date.parse(result.date ? `${result.date}T12:00:00Z` : '')
+  return Number.isNaN(timestamp) ? Number.NEGATIVE_INFINITY : timestamp
 }
 
-export const playerStats = [
-  { playerId: 22, appearances: 6, starts: 6, minutes: 476, goals: 8, assists: 3 },
-  { playerId: 21, appearances: 6, starts: 6, minutes: 489, goals: 7, assists: 2 },
-  { playerId: 14, appearances: 6, starts: 4, minutes: 391, goals: 4, assists: 2 },
-  { playerId: 24, appearances: 6, starts: 4, minutes: 336, goals: 0, assists: 4 },
-  { playerId: 23, appearances: 6, starts: 2, minutes: 204, goals: 3, assists: 1 },
-  { playerId: 7, appearances: 5, starts: 5, minutes: 439, goals: 1, assists: 2 },
-  { playerId: 15, appearances: 6, starts: 5, minutes: 413, goals: 1, assists: 2 },
-  { playerId: 19, appearances: 6, starts: 3, minutes: 286, goals: 0, assists: 2 },
-  { playerId: 17, appearances: 6, starts: 2, minutes: 240, goals: 0, assists: 2 },
-  { playerId: 20, appearances: 2, starts: 0, minutes: 18, goals: 1, assists: 0 },
-  { playerId: 4, appearances: 5, starts: 1, minutes: 132, goals: 0, assists: 1 },
-]
+function normalizeProviderPlayer(player) {
+  const id = player?.id ?? player?.playerId ?? player?.providerId
+  if (id == null) return null
+
+  const name = player.name || player.shortName || `Player ${id}`
+  return {
+    ...player,
+    id,
+    name,
+    shortName: player.shortName || name,
+    number: player.number ?? '—',
+    position: player.position || player.role || 'Player',
+    role: player.role || player.position || 'First team',
+    image: player.image || player.photo || null,
+  }
+}
+
+export const results = (Array.isArray(snapshot.results) ? snapshot.results : [])
+  .map((result) => ({
+    ...result,
+    goals: Array.isArray(result.goals) ? result.goals.filter(Boolean) : [],
+  }))
+  .sort((first, second) => resultTime(second) - resultTime(first))
+
+export const playerStats = Array.isArray(snapshot.playerStats) ? snapshot.playerStats : []
+export const providerPlayers = (Array.isArray(snapshot.providerPlayers) ? snapshot.providerPlayers : [])
+  .map(normalizeProviderPlayer)
+  .filter(Boolean)
+
+const resultPlayerMap = new Map()
+
+function indexResultPlayer(player) {
+  resultPlayerMap.set(String(player.id), player)
+  if (player.playerId != null) resultPlayerMap.set(String(player.playerId), player)
+  if (player.providerId != null) {
+    resultPlayerMap.set(String(player.providerId), player)
+    resultPlayerMap.set(`api-${player.providerId}`, player)
+  }
+}
+
+for (const player of providerPlayers) indexResultPlayer(player)
+for (const player of localPlayers) indexResultPlayer(player)
+
+export const resultPlayers = [...new Map(
+  [...providerPlayers, ...localPlayers].map((player) => [String(player.id), player]),
+).values()]
+export const resultCompetitions = ['All', ...new Set(results.map((result) => result.competition).filter(Boolean))]
+
+export function getResultPlayer(playerId) {
+  if (playerId == null) return null
+  return resultPlayerMap.get(String(playerId)) || resultPlayerMap.get(`api-${playerId}`) || null
+}
+
+function parseScore(value) {
+  if (value == null || value === '') return null
+  const score = Number(value)
+  return Number.isFinite(score) ? score : null
+}
+
+export function getResultOutcome(result) {
+  const recordedOutcome = typeof result?.outcome === 'string' ? result.outcome.toUpperCase() : null
+  if (['W', 'D', 'L'].includes(recordedOutcome)) return recordedOutcome
+
+  const barcelonaIsHome = result?.homeCode === 'BAR'
+  const barcelonaScore = parseScore(barcelonaIsHome ? result?.homeScore : result?.awayScore)
+  const opponentScore = parseScore(barcelonaIsHome ? result?.awayScore : result?.homeScore)
+  if (barcelonaScore == null || opponentScore == null) return null
+  if (barcelonaScore === opponentScore) return 'D'
+  return barcelonaScore > opponentScore ? 'W' : 'L'
+}
+
+export const resultSummary = results.reduce((summary, result) => {
+  const outcome = getResultOutcome(result)
+  if (!outcome) return summary
+
+  const barcelonaIsHome = result.homeCode === 'BAR'
+  const goalsFor = parseScore(barcelonaIsHome ? result.homeScore : result.awayScore)
+  const goalsAgainst = parseScore(barcelonaIsHome ? result.awayScore : result.homeScore)
+
+  summary.played += 1
+  summary.wins += outcome === 'W' ? 1 : 0
+  summary.draws += outcome === 'D' ? 1 : 0
+  summary.losses += outcome === 'L' ? 1 : 0
+  summary.goalsFor += goalsFor ?? 0
+  summary.goalsAgainst += goalsAgainst ?? 0
+  summary.cleanSheets += goalsAgainst === 0 ? 1 : 0
+  return summary
+}, {
+  played: 0,
+  wins: 0,
+  draws: 0,
+  losses: 0,
+  goalsFor: 0,
+  goalsAgainst: 0,
+  cleanSheets: 0,
+})
 
 export const recentResults = results.slice(0, 3).map((result) => {
   const isHome = result.homeCode === 'BAR'
   return {
+    id: result.id,
     opponent: isHome ? result.away : result.home,
-    score: `${isHome ? result.homeScore : result.awayScore}–${isHome ? result.awayScore : result.homeScore}`,
-    outcome: 'W',
+    score: `${(isHome ? result.homeScore : result.awayScore) ?? '—'}–${(isHome ? result.awayScore : result.homeScore) ?? '—'}`,
+    outcome: getResultOutcome(result) || '—',
     location: isHome ? 'Home' : 'Away',
   }
 })
+
+const latestResultDate = results.reduce(
+  (latest, result) => (!latest || result.date > latest ? result.date : latest),
+  null,
+)
+
+export const resultsCheckedAt = snapshotCheckedAt
+export const playerStatsThrough = formatSnapshotMatchDate(latestResultDate)

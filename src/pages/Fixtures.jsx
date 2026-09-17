@@ -4,9 +4,9 @@ import FilterChip from '../components/FilterChip.jsx'
 import FixtureCard from '../components/FixtureCard.jsx'
 import PageHeader from '../components/PageHeader.jsx'
 import TimezoneSelect from '../components/TimezoneSelect.jsx'
-import { fixtures, getTeamSide } from '../data/fixtures.js'
+import { fixtureCompetitions, fixtures, fixturesCheckedAt, getTeamSide } from '../data/fixtures.js'
+import { snapshotSeasonLabel } from '../data/snapshot.js'
 
-const competitions = ['All', 'La Liga', 'Champions League']
 const locations = ['All', 'Home', 'Away']
 
 export default function Fixtures() {
@@ -33,7 +33,7 @@ export default function Fixtures() {
   return (
     <div className="pb-20">
       <PageHeader
-        eyebrow="Men’s first team · 2026/27"
+        eyebrow={`Men’s first team · ${snapshotSeasonLabel}`}
         title="Every date. Every kickoff."
         description="Confirmed match times automatically adjust to your chosen timezone. TBA means the league or competition has not locked the kickoff yet."
         action={<TimezoneSelect />}
@@ -44,7 +44,7 @@ export default function Fixtures() {
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-slate-300"><Filter size={14} className="text-gold" /> Competition</div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {competitions.map((item) => <FilterChip key={item} selected={competition === item} onClick={() => setCompetition(item)}>{item}</FilterChip>)}
+              {fixtureCompetitions.map((item) => <FilterChip key={item} selected={competition === item} onClick={() => setCompetition(item)}>{item}</FilterChip>)}
             </div>
           </div>
           <div>
@@ -80,7 +80,7 @@ export default function Fixtures() {
 
         <div className="data-note mt-12">
           <div>
-            <p className="font-semibold text-slate-200">Schedule checked 16 September 2026</p>
+            <p className="font-semibold text-slate-200">Schedule checked {fixturesCheckedAt}</p>
             <p className="mt-1 text-xs leading-5 text-slate-500">Times and venues can change. Always confirm close to matchday.</p>
           </div>
           <a href="https://www.fcbarcelona.com/en/futbol/primer-equipo/calendario" target="_blank" rel="noreferrer" className="text-link shrink-0">

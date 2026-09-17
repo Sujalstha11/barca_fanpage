@@ -8,11 +8,28 @@ import TimezoneSelect from '../components/TimezoneSelect.jsx'
 import { usePreferences } from '../context/preferences.js'
 import { fixtures } from '../data/fixtures.js'
 import { featuredPlayerIds, players } from '../data/players.js'
-import { recentResults } from '../data/results.js'
+import { recentResults, resultSummary } from '../data/results.js'
+import { snapshotSeasonLabel } from '../data/snapshot.js'
 import { formatFixtureDate, formatFixtureTime, getAge, getTimezoneLabel } from '../utils/formatters.js'
 
 const heroImage = 'https://images.unsplash.com/photo-1544366981-53db834f982a?auto=format&fit=crop&q=88&w=2200'
 const pageLoadedAt = Date.now()
+
+const outcomeStyles = {
+  W: 'bg-emerald-300 text-emerald-950',
+  D: 'bg-amber-300 text-amber-950',
+  L: 'bg-rose-400 text-rose-950',
+}
+
+function getSeasonPulse(summary) {
+  if (summary.played === 0) return 'The competitive season is yet to begin.'
+
+  const matches = `${summary.played} competitive ${summary.played === 1 ? 'match' : 'matches'}`
+  const record = `${summary.wins}W, ${summary.draws}D, ${summary.losses}L.`
+  if (summary.losses === 0 && summary.draws === 0) return `${matches}. ${record} A perfect record so far.`
+  if (summary.losses === 0) return `${matches}. ${record} The team remains unbeaten.`
+  return `${matches}. ${record} Every result shapes the season.`
+}
 
 function useCountdown(kickoff) {
   const [remaining, setRemaining] = useState(() => Math.max(0, new Date(kickoff).getTime() - pageLoadedAt))
@@ -51,11 +68,13 @@ export default function Home() {
   const nextFixture = fixtures.find((fixture) => {
     if (fixture.kickoff) return new Date(fixture.kickoff).getTime() > pageLoadedAt
     return new Date(`${fixture.date}T23:59:59`).getTime() > pageLoadedAt
-  }) || fixtures[0]
-  const nextIndex = fixtures.findIndex((fixture) => fixture.id === nextFixture.id)
-  const upcoming = fixtures.slice(nextIndex + 1, nextIndex + 4)
+  }) || null
+  const nextIndex = nextFixture ? fixtures.findIndex((fixture) => fixture.id === nextFixture.id) : -1
+  const upcoming = nextFixture ? fixtures.slice(nextIndex + 1, nextIndex + 4) : []
   const featuredPlayers = players.filter((player) => featuredPlayerIds.includes(player.id))
-  const averageAge = Math.round(players.reduce((total, player) => total + getAge(player.birthDate), 0) / players.length)
+  const averageAge = players.length
+    ? Math.round(players.reduce((total, player) => total + getAge(player.birthDate), 0) / players.length)
+    : '—'
 
   return (
     <>
@@ -68,7 +87,7 @@ export default function Home() {
           <div className="max-w-2xl">
             <div className="flex items-center gap-3">
               <span className="live-dot" aria-hidden="true" />
-              <p className="eyebrow text-slate-300">Independent supporters’ desk · 2026/27</p>
+              <p className="eyebrow text-slate-300">Independent supporters’ desk · {snapshotSeasonLabel}</p>
             </div>
             <h1 className="mt-6 font-display text-[clamp(4.2rem,9vw,7.5rem)] font-black uppercase leading-[0.76] tracking-[-0.065em] text-white">
               Matchday
@@ -95,50 +114,59 @@ export default function Home() {
             </a>
           </div>
 
-          <article className="next-match-card">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="size-2 animate-pulse rounded-full bg-emerald-400" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">Next match</span>
+          {nextFixture ? (
+            <article className="next-match-card">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="size-2 animate-pulse rounded-full bg-emerald-400" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-300">Next match</span>
+                </div>
+                <CompetitionPill competition={nextFixture.competition} />
               </div>
-              <CompetitionPill competition={nextFixture.competition} />
-            </div>
 
-            <div className="mt-7 text-center">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
-                {formatFixtureDate(nextFixture, timezone)} · {nextFixture.round}
-              </p>
-              <div className="mt-7 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                <div className="flex min-w-0 flex-col items-center">
-                  <TeamBadge code={nextFixture.homeCode} size="lg" />
-                  <p className="mt-3 line-clamp-2 font-display text-lg font-black uppercase leading-none text-white">{nextFixture.home}</p>
-                </div>
-                <div>
-                  <span className="font-display text-4xl font-black text-white/30">VS</span>
-                </div>
-                <div className="flex min-w-0 flex-col items-center">
-                  <TeamBadge code={nextFixture.awayCode} size="lg" />
-                  <p className="mt-3 line-clamp-2 font-display text-lg font-black uppercase leading-none text-white">{nextFixture.away}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="my-7 h-px bg-white/10" />
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <p className="font-display text-5xl font-black leading-none text-white">{formatFixtureTime(nextFixture, timezone)}</p>
-                <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                  {getTimezoneLabel(timezone)}
+              <div className="mt-7 text-center">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-400">
+                  {formatFixtureDate(nextFixture, timezone)} · {nextFixture.round}
                 </p>
+                <div className="mt-7 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                  <div className="flex min-w-0 flex-col items-center">
+                    <TeamBadge code={nextFixture.homeCode} size="lg" />
+                    <p className="mt-3 line-clamp-2 font-display text-lg font-black uppercase leading-none text-white">{nextFixture.home}</p>
+                  </div>
+                  <div>
+                    <span className="font-display text-4xl font-black text-white/30">VS</span>
+                  </div>
+                  <div className="flex min-w-0 flex-col items-center">
+                    <TeamBadge code={nextFixture.awayCode} size="lg" />
+                    <p className="mt-3 line-clamp-2 font-display text-lg font-black uppercase leading-none text-white">{nextFixture.away}</p>
+                  </div>
+                </div>
               </div>
-              {nextFixture.kickoff && <div className="w-48 max-w-[52%]"><Countdown kickoff={nextFixture.kickoff} /></div>}
-            </div>
-            <div className="mt-6 flex items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-xs text-slate-300">
-              <MapPin size={14} className="text-gold" />
-              {nextFixture.venue}
-            </div>
-            <div className="mt-4"><TimezoneSelect dark /></div>
-          </article>
+
+              <div className="my-7 h-px bg-white/10" />
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="font-display text-5xl font-black leading-none text-white">{formatFixtureTime(nextFixture, timezone)}</p>
+                  <p className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                    {getTimezoneLabel(timezone)}
+                  </p>
+                </div>
+                {nextFixture.kickoff && <div className="w-48 max-w-[52%]"><Countdown kickoff={nextFixture.kickoff} /></div>}
+              </div>
+              <div className="mt-6 flex items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-xs text-slate-300">
+                <MapPin size={14} className="text-gold" />
+                {nextFixture.venue || 'Venue to be confirmed'}
+              </div>
+              <div className="mt-4"><TimezoneSelect dark /></div>
+            </article>
+          ) : (
+            <article className="next-match-card flex min-h-96 flex-col items-center justify-center text-center">
+              <span className="grid size-16 place-items-center rounded-2xl bg-gold/10 text-gold"><CalendarDays size={28} /></span>
+              <p className="mt-6 eyebrow">Schedule update pending</p>
+              <h2 className="mt-3 font-display text-4xl font-black uppercase text-white">No upcoming match yet</h2>
+              <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400">The next fixture will appear here after the schedule is confirmed.</p>
+            </article>
+          )}
         </div>
       </section>
 
@@ -152,7 +180,11 @@ export default function Home() {
             <Link to="/fixtures" className="text-link">Full calendar <ArrowRight size={15} /></Link>
           </div>
           <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {upcoming.map((fixture) => <FixtureCard key={fixture.id} fixture={fixture} compact />)}
+            {upcoming.length > 0 ? (
+              upcoming.map((fixture) => <FixtureCard key={fixture.id} fixture={fixture} compact />)
+            ) : (
+              <p className="rounded-3xl border border-white/8 bg-panel p-6 text-sm text-slate-400 md:col-span-3">More fixtures will appear here when they are confirmed.</p>
+            )}
           </div>
         </div>
       </section>
@@ -162,15 +194,17 @@ export default function Home() {
           <div className="rounded-3xl bg-gradient-to-br from-claret to-[#67002d] p-7 sm:p-9">
             <p className="eyebrow text-white/65">Season pulse</p>
             <h2 className="mt-4 font-display text-5xl font-black uppercase leading-[.9]">Form is a feeling.</h2>
-            <p className="mt-5 max-w-md text-sm leading-6 text-white/70">Six competitive matches. Six wins. The first team has opened the season at full speed.</p>
+            <p className="mt-5 max-w-md text-sm leading-6 text-white/70">{getSeasonPulse(resultSummary)}</p>
             <div className="mt-9 flex gap-2">
-              {recentResults.map((result) => (
-                <div key={result.opponent} className="flex-1 rounded-2xl bg-black/15 p-3">
-                  <span className="grid size-7 place-items-center rounded-full bg-emerald-300 text-xs font-black text-emerald-950">{result.outcome}</span>
+              {recentResults.length > 0 ? recentResults.map((result) => (
+                <div key={result.id || `${result.opponent}-${result.score}`} className="flex-1 rounded-2xl bg-black/15 p-3">
+                  <span className={`grid size-7 place-items-center rounded-full text-xs font-black ${outcomeStyles[result.outcome] || 'bg-white/10 text-white'}`}>{result.outcome}</span>
                   <p className="mt-4 font-display text-2xl font-black">{result.score}</p>
                   <p className="mt-1 truncate text-[10px] font-bold uppercase tracking-wide text-white/55">{result.opponent}</p>
                 </div>
-              ))}
+              )) : (
+                <p className="text-sm text-white/55">Results will appear after the first final whistle.</p>
+              )}
             </div>
             <Link to="/results" className="mt-6 inline-flex items-center gap-2 text-xs font-black uppercase tracking-wide text-white transition hover:text-gold">
               See every result <ArrowRight size={14} />

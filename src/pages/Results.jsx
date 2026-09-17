@@ -4,14 +4,30 @@ import FilterChip from '../components/FilterChip.jsx'
 import PageHeader from '../components/PageHeader.jsx'
 import PlayerPhoto from '../components/PlayerPhoto.jsx'
 import ResultCard from '../components/ResultCard.jsx'
-import { players } from '../data/players.js'
-import { playerStats, results, resultSummary } from '../data/results.js'
+import {
+  playerStats,
+  playerStatsThrough,
+  getResultPlayer,
+  resultCompetitions,
+  results,
+  resultsCheckedAt,
+  resultSummary,
+} from '../data/results.js'
+import { snapshotSeasonLabel } from '../data/snapshot.js'
 
-const competitions = ['All', 'La Liga', 'Champions League']
 const locations = ['All', 'Home', 'Away']
-const playerById = new Map(players.map((player) => [player.id, player]))
 
-const statsWithPlayers = playerStats.map((stat) => ({ ...stat, player: playerById.get(stat.playerId) }))
+const statsWithPlayers = playerStats.map((stat) => ({
+  ...stat,
+  player: getResultPlayer(stat.playerId) || {
+    id: stat.playerId,
+    name: 'Player unavailable',
+    number: '—',
+    role: 'First team',
+    position: 'Player',
+    image: null,
+  },
+}))
 const goalscorers = [...statsWithPlayers].filter((stat) => stat.goals > 0).sort((a, b) => b.goals - a.goals)
 const assistProviders = [...statsWithPlayers].filter((stat) => stat.assists > 0).sort((a, b) => b.assists - a.assists)
 
@@ -64,15 +80,25 @@ export default function Results() {
 
   const summaryCards = [
     { icon: Trophy, value: resultSummary.played, label: 'Played', note: 'Competitive matches' },
-    { icon: BarChart3, value: `${resultSummary.wins}-${resultSummary.draws}-${resultSummary.losses}`, label: 'W–D–L', note: 'Perfect opening run' },
-    { icon: Crosshair, value: resultSummary.goalsFor, label: 'Goals scored', note: `${(resultSummary.goalsFor / resultSummary.played).toFixed(1)} per match` },
+    {
+      icon: BarChart3,
+      value: `${resultSummary.wins}-${resultSummary.draws}-${resultSummary.losses}`,
+      label: 'W–D–L',
+      note: resultSummary.played ? `${Math.round((resultSummary.wins / resultSummary.played) * 100)}% win rate` : 'Awaiting first result',
+    },
+    {
+      icon: Crosshair,
+      value: resultSummary.goalsFor,
+      label: 'Goals scored',
+      note: resultSummary.played ? `${(resultSummary.goalsFor / resultSummary.played).toFixed(1)} per match` : 'No completed matches',
+    },
     { icon: ShieldCheck, value: resultSummary.cleanSheets, label: 'Clean sheets', note: `${resultSummary.goalsAgainst} goals conceded` },
   ]
 
   return (
     <div className="pb-20">
       <PageHeader
-        eyebrow="Men’s first team · 2026/27"
+        eyebrow={`Men’s first team · ${snapshotSeasonLabel}`}
         title="Final whistle. Full story."
         description="Every finished match, every scorer and every final pass from Barça’s competitive season so far."
       />
@@ -82,7 +108,7 @@ export default function Results() {
           <div>
             <div className="flex items-center gap-2 text-xs font-bold text-slate-300"><Filter size={14} className="text-gold" /> Competition</div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {competitions.map((item) => <FilterChip key={item} selected={competition === item} onClick={() => setCompetition(item)}>{item}</FilterChip>)}
+              {resultCompetitions.map((item) => <FilterChip key={item} selected={competition === item} onClick={() => setCompetition(item)}>{item}</FilterChip>)}
             </div>
           </div>
           <div>
@@ -120,7 +146,7 @@ export default function Results() {
               <p className="eyebrow">The numbers</p>
               <h2 id="player-stat-table" className="section-title">Player stats</h2>
             </div>
-            <span className="text-xs font-bold text-slate-500">Through 13 Sep 2026</span>
+            <span className="text-xs font-bold text-slate-500">{playerStatsThrough ? `Through ${playerStatsThrough}` : 'No completed matches'}</span>
           </div>
 
           <div className="mt-6 overflow-hidden rounded-3xl border border-white/8 bg-panel">
@@ -180,7 +206,7 @@ export default function Results() {
 
         <div className="data-note mt-12">
           <div>
-            <p className="font-semibold text-slate-200">Results and player stats checked 16 September 2026</p>
+            <p className="font-semibold text-slate-200">Results and player stats checked {resultsCheckedAt}</p>
             <p className="mt-1 text-xs leading-5 text-slate-500">Competitive first-team matches only. Assist attribution can vary slightly between data providers.</p>
           </div>
           <a href="https://www.fcbarcelona.com/en/futbol/primer-equip/resultats" target="_blank" rel="noreferrer" className="text-link shrink-0">

@@ -1,12 +1,14 @@
-import { CalendarDays, FileClock, Home, Menu, Trophy, UsersRound, X } from 'lucide-react'
+import { CalendarDays, FileClock, Home, Menu, Table2, Trophy, UsersRound, X } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import BrandMark from './BrandMark.jsx'
+import { snapshotSeasonLabel } from '../data/snapshot.js'
 
 const navigation = [
   { to: '/', label: 'Home', icon: Home, end: true },
   { to: '/fixtures', label: 'Fixtures', icon: CalendarDays },
   { to: '/results', label: 'Results', icon: Trophy },
+  { to: '/standings', label: 'Standings', icon: Table2 },
   { to: '/squad', label: 'Squad', icon: UsersRound },
   { to: '/contracts', label: 'Contracts', icon: FileClock },
 ]
@@ -53,7 +55,7 @@ export default function Layout() {
 
           <div className="hidden items-center gap-3 lg:flex">
             <span className="live-dot" aria-hidden="true" />
-            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-300">2026/27 season</span>
+            <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-300">{snapshotSeasonLabel} season</span>
           </div>
 
           <button
@@ -104,7 +106,7 @@ export default function Layout() {
           <div>
             <BrandMark />
             <p className="mt-4 max-w-sm text-sm leading-6 text-slate-400">
-              Made by fans, for fans. Fixtures, results, squad details, and contract insights in one calm matchday companion.
+              Made by fans, for fans. Fixtures, results, standings, squad details, and contract insights in one calm matchday companion.
             </p>
           </div>
           <div>

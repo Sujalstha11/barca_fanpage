@@ -7,6 +7,7 @@ import Home from './pages/Home.jsx'
 import NotFound from './pages/NotFound.jsx'
 import Results from './pages/Results.jsx'
 import Squad from './pages/Squad.jsx'
+import Standings from './pages/Standings.jsx'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -27,6 +28,7 @@ export default function App() {
           <Route index element={<Home />} />
           <Route path="fixtures" element={<Fixtures />} />
           <Route path="results" element={<Results />} />
+          <Route path="standings" element={<Standings />} />
           <Route path="squad" element={<Squad />} />
           <Route path="contracts" element={<Contracts />} />
           <Route path="*" element={<NotFound />} />
