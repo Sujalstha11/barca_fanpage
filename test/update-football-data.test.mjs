@@ -219,6 +219,7 @@ async function runUpdater(baseUrl, extraEnvironment = {}) {
       cwd: projectRoot,
       env: {
         ...process.env,
+        FOOTBALL_DATA_PROVIDER: 'api-football',
         API_FOOTBALL_KEY: 'integration-test-key',
         API_FOOTBALL_BASE_URL: baseUrl,
         ...extraEnvironment,

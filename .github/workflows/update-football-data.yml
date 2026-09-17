@@ -69,8 +69,12 @@ jobs:
         id: update
         shell: bash
         env:
+          FOOTBALL_DATA_PROVIDER: goal-api
+          GOAL_API_KEY: ${{ secrets.GOAL_API_KEY }}
+          FOOTBALL_DATA_SEASON: ${{ vars.FOOTBALL_DATA_SEASON || vars.GOAL_API_SEASON || '2026' }}
+          GOAL_API_SEASON: ${{ vars.FOOTBALL_DATA_SEASON || vars.GOAL_API_SEASON || '2026' }}
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
-          API_FOOTBALL_SEASON: ${{ vars.API_FOOTBALL_SEASON || '2026' }}
+          API_FOOTBALL_SEASON: ${{ vars.API_FOOTBALL_SEASON || vars.FOOTBALL_DATA_SEASON || vars.GOAL_API_SEASON || '2026' }}
           UPDATE_MODE: ${{ steps.update-mode.outputs.mode }}
         run: |
           if [[ "$UPDATE_MODE" == "full" ]]; then

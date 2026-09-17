@@ -180,7 +180,7 @@ export default function Standings() {
               <p className="mt-1 text-xs leading-5 text-slate-500">League tables can change after every match. Positions and qualification zones reflect the latest completed fixtures.</p>
             </div>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">Official competition data</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">Automated provider data</span>
         </div>
       </div>
     </div>

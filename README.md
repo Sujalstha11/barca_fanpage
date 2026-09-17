@@ -20,17 +20,17 @@ npm run lint
 npm run build
 ```
 
-## API-Football setup
+## Football data setup
 
-Automatic updates use [API-Football v3](https://www.api-football.com/documentation-v3). Follow the provider’s [getting-started guide](https://www.api-football.com/news/post/how-to-get-started-with-api-football-the-complete-beginners-guide), copy the football API key from its dashboard, and keep that key private.
+Automatic updates use [GOAL API](https://goal-api.com/documentation) as the primary source for fixtures, results, match events, player statistics, and La Liga standings. Its free plan currently includes [1,000 requests per day](https://goal-api.com/what-is-goal-api). The public, keyless [Barça API](https://api.fc-barcelona.app/en/docs) is the UEFA Champions League standings fallback because GOAL API's current Champions League coverage does not expose that table.
 
-For local updates, copy the example environment file and fill in `API_FOOTBALL_KEY`:
+For local updates, copy the example environment file and fill in `GOAL_API_KEY`:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-The updater loads the repository-root `.env` file when it exists. The example also contains the FC Barcelona team and season defaults, the post-match polling window, and an optional API base URL override. `.env` is ignored by Git and must never be committed.
+The updater loads the repository-root `.env` file when it exists. The example also contains the provider, season, post-match polling window, and optional API endpoint overrides. `.env` is ignored by Git and must never be committed. The updater sends the GOAL API key as a server-side Bearer credential; do not put it in React code, use a `VITE_`-prefixed variable, or commit it.
 
 Run a complete refresh with:
 
@@ -44,23 +44,26 @@ Run the same guarded mode used by the frequent automation with:
 npm run data:update:scheduled
 ```
 
-`data:update` contacts the provider immediately. `data:update:scheduled` first checks the committed fixture schedule and exits without making an API request unless a Barça match is inside the configured post-kickoff window. A regular full or post-match sync normally uses about 6–7 requests, depending on active competitions and provider pagination. The first sync usually needs one extra team-verification request; an out-of-window run uses zero, while an in-window final-status check uses one. Provider corrections or missing event details can increase that estimate.
+`data:update` contacts the providers immediately. `data:update:scheduled` first checks the committed fixture schedule and exits without making an API request unless a Barça match is inside the configured post-kickoff window. An out-of-window scheduled run uses zero requests. An in-window no-change check is normally about 1–2 requests; a full or match-changing refresh uses tens of requests rather than hundreds, with the exact count depending on competitions, pagination, and match details.
 
-With the included schedule, expect roughly 7 requests on a normal no-match day and about 13–15 on a match day—comfortably below the provider’s current [100-request free daily allowance](https://www.api-football.com/news/post/how-ratelimit-works).
+The half-hour checks therefore consume nothing on a normal out-of-window day; the daily full refresh accounts for most usage and remains comfortably below GOAL API's 1,000-request daily allowance. Match days add the small status checks and one detailed refresh after new data appears.
+
+API-Football remains available as an optional provider for an account with current-season access. Set `FOOTBALL_DATA_PROVIDER=api-football` and add `API_FOOTBALL_KEY`; its team, season, and endpoint settings remain in `.env.example` for backward compatibility.
 
 Do not hand-edit `src/data/generated/snapshot.json`. Update mapping or normalization code and regenerate it instead.
 
 ## GitHub automation
 
-Add a repository Actions secret named `API_FOOTBALL_KEY` under **Settings → Secrets and variables → Actions**. The workflow at `.github/workflows/update-football-data.yml` then runs:
+Add a repository Actions secret named `GOAL_API_KEY` under **Settings → Secrets and variables → Actions**. Paste only the key as the secret value; GitHub supplies it to the updater without exposing it to the browser or generated site. The workflow at `.github/workflows/update-football-data.yml` then runs:
 
 - every 30 minutes in gated scheduled mode;
 - once daily at 04:23 UTC in full mode; and
-- on demand with either mode from the Actions tab.
+- on demand with either mode from the Actions tab; and
+- in full mode when the workflow file itself changes on `main`, which verifies automation changes immediately.
 
-At the start of a later season, set the repository Actions variable `API_FOOTBALL_SEASON` to that season’s starting year (for example, `2027` for 2027/28) and run one manual **full** update. The updater initializes the new season without comparing it to the old results; page season labels follow the generated data.
+At the start of a later season, set the repository Actions variable `FOOTBALL_DATA_SEASON` to that season’s starting year (for example, `2027` for 2027/28) and run one manual **full** update. `GOAL_API_SEASON` is also accepted as a backward-compatible fallback. The updater initializes the new season without comparing it to the old results; page season labels follow the generated data.
 
-Each run checks or updates the snapshot first. If the data is unchanged, it stops there; if it changed, it installs locked dependencies, validates the snapshot, runs the Node tests and ESLint, builds the Vite site, and commits only `src/data/generated/snapshot.json` and `dist`. The workflow has one concurrency group, so two update runs cannot write at the same time. It has no `push` trigger and ignores the Actions bot as an actor, preventing update commits from starting a bot loop.
+Each run checks or updates the snapshot first. If the data is unchanged, it stops there; if it changed, it installs locked dependencies, validates the snapshot, runs the Node tests and ESLint, builds the Vite site, and commits only `src/data/generated/snapshot.json` and `dist`. The workflow has one concurrency group, so two update runs cannot write at the same time. Its narrow push trigger watches only the workflow file, and it ignores the Actions bot as an actor, preventing generated-data commits from starting a bot loop.
 
 If the workflow cannot push, confirm that repository Actions settings allow `GITHUB_TOKEN` read/write access and that branch protection permits this workflow. The repository does not otherwise prescribe a hosting platform: a host connected to `main` can redeploy from the automation commit, while a host serving the tracked `dist` directory receives the rebuilt output in the same commit.
 

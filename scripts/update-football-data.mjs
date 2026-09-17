@@ -6,6 +6,15 @@ import { fileURLToPath } from 'node:url'
 
 import { players as localPlayers } from '../src/data/players.js'
 import { createApiFootballClient } from './football-data/api-client.mjs'
+import { GoalApiError, createGoalApiClient } from './football-data/goal-api-client.mjs'
+import {
+  adaptBarcaStandings,
+  adaptGoalFixture,
+  adaptGoalPlayers,
+  adaptGoalStandings,
+  goalSeasonLabel,
+  positiveNumericId,
+} from './football-data/goal-api-adapter.mjs'
 import {
   FINISHED_STATUSES,
   competitionMetadata,
@@ -60,7 +69,7 @@ function parseArguments(argumentsList) {
 
 async function loadLocalEnvironment() {
   const environmentPath = path.join(PROJECT_ROOT, '.env')
-  if (!existsSync(environmentPath) || process.env.API_FOOTBALL_KEY) return
+  if (!existsSync(environmentPath)) return
   if (typeof process.loadEnvFile !== 'function') {
     throw new Error('This Node.js version cannot load .env files. Use Node.js 20.12 or newer.')
   }
@@ -269,7 +278,9 @@ function assertCompleteSeasonResponse(apiFixtures, snapshot, runtimeConfig) {
   if (wrongTeam) throw new Error(`Fixture ${wrongTeam.fixture?.id} does not include the configured team.`)
 
   const sameSeason = Number(snapshot.source?.season) === runtimeConfig.season
-  const hasProviderBaseline = snapshot.source?.name === 'api-football'
+  const providerName = runtimeConfig.providerName || 'api-football'
+  const providerLabel = runtimeConfig.providerLabel || 'The football data provider'
+  const hasProviderBaseline = snapshot.source?.name === providerName
     && sameSeason
     && Number(snapshot.source?.teamId) === runtimeConfig.teamId
 
@@ -285,7 +296,7 @@ function assertCompleteSeasonResponse(apiFixtures, snapshot, runtimeConfig) {
 
   if (finished.length < snapshot.results.length) {
     throw new Error(
-      `API-Football returned only ${finished.length} completed matches; the current snapshot has ${snapshot.results.length}.`,
+      `${providerLabel} returned only ${finished.length} completed matches; the current snapshot has ${snapshot.results.length}.`,
     )
   }
 
@@ -370,6 +381,457 @@ function reportRequestCount(client) {
   console.log(`API requests used: ${client.getRequestCount()}${quota}`)
 }
 
+function normalizedClubName(value) {
+  return normalizeName(value)
+    .replace(/^(?:fc|cf)\s+/, '')
+    .replace(/\s+(?:fc|cf)$/, '')
+}
+
+function goalFixtureBelongsToSeason(fixture, season) {
+  const value = String(fixture?.leagueYear || '').trim()
+  if (!value) return true
+  const normalized = value.replace(/-/g, '/').replace(/\s+/g, '')
+  const accepted = new Set([
+    String(season),
+    `${season}/${season + 1}`,
+    `${season}/${String(season + 1).slice(-2)}`,
+  ])
+  return accepted.has(normalized)
+}
+
+function goalSeasonRange(season) {
+  return {
+    from: `${season}-07-01`,
+    to: `${season + 1}-06-30`,
+  }
+}
+
+function goalFixtureLeagueKey(fixture) {
+  return String(fixture?.leagueId || fixture?.league?.id || '').trim()
+}
+
+function goalFixtureKey(fixture) {
+  return String(fixture?.id || fixture?.apiId || '').trim()
+}
+
+async function resolveGoalTeam(client, runtimeConfig, snapshot, options) {
+  if (
+    options.mode === 'scheduled'
+    && snapshot.source?.name === 'goal-api'
+    && snapshot.source?.teamProviderId
+    && Number.isInteger(Number(snapshot.source?.teamId))
+  ) {
+    return {
+      id: snapshot.source.teamProviderId,
+      apiId: String(snapshot.source.teamId),
+      name: snapshot.source.teamName || runtimeConfig.teamName,
+      country: snapshot.source.teamCountry || runtimeConfig.teamCountry,
+    }
+  }
+
+  const rows = await client.getAll('teams', {
+    search: runtimeConfig.teamName,
+    country: runtimeConfig.teamCountry,
+    isActive: true,
+  })
+  const expectedName = normalizedClubName(runtimeConfig.teamName)
+  const expectedCountry = normalizeName(runtimeConfig.teamCountry)
+  let matches = rows.filter((team) => (
+    normalizedClubName(team?.name) === expectedName
+    && normalizeName(team?.country) === expectedCountry
+  ))
+  if (runtimeConfig.goalTeamApiId) {
+    matches = matches.filter((team) => Number(team?.apiId) === runtimeConfig.goalTeamApiId)
+  }
+  if (matches.length !== 1) {
+    throw new Error(`GOAL API team discovery found ${matches.length} exact Barcelona matches; the snapshot was preserved.`)
+  }
+  const team = matches[0]
+  if (!team.id || !Number.isInteger(Number(team.apiId)) || Number(team.apiId) <= 0) {
+    throw new Error('GOAL API returned Barcelona without usable team identifiers.')
+  }
+  return team
+}
+
+async function discoverGoalCompetitions(client, fixtures, runtimeConfig, snapshot, options) {
+  const saved = options.mode === 'scheduled' && snapshot.source?.name === 'goal-api'
+    ? snapshot.source?.competitions || []
+    : []
+  const savedByKey = new Map(saved
+    .filter((competition) => competition?.providerKey)
+    .map((competition) => [String(competition.providerKey), competition]))
+  const firstFixtureByLeague = new Map()
+  for (const fixture of fixtures) {
+    const key = goalFixtureLeagueKey(fixture)
+    if (key && !firstFixtureByLeague.has(key)) firstFixtureByLeague.set(key, fixture)
+  }
+
+  const competitions = []
+  for (const [providerKey, fixture] of firstFixtureByLeague) {
+    const savedCompetition = savedByKey.get(providerKey)
+    if (savedCompetition) {
+      competitions.push(savedCompetition)
+      continue
+    }
+
+    const body = await client.get(`leagues/${encodeURIComponent(providerKey)}`)
+    const league = body.data || {}
+    const fixtureLeagueName = fixture?.league?.name || fixture?.leagueName || league.name
+    if (!isCompetitiveCompetition({ name: fixtureLeagueName })) continue
+    const providerLeagueId = positiveNumericId(league.apiId || providerKey)
+    const metadata = competitionMetadata({ id: providerLeagueId, name: league.name || fixtureLeagueName })
+    const hasTable = ['la-liga', 'champions-league'].includes(metadata.id)
+    competitions.push({
+      providerLeagueId,
+      providerKey,
+      id: metadata.id,
+      name: metadata.name,
+      type: hasTable ? 'League' : 'Competition',
+      season: seasonLabel(runtimeConfig.season),
+      hasStandings: hasTable,
+      hasEvents: true,
+      hasPlayerStats: true,
+      totalMatchdays: metadata.totalMatchdays,
+      sourceLabel: metadata.sourceLabel,
+      sourceUrl: metadata.sourceUrl,
+    })
+  }
+
+  if (competitions.length === 0) {
+    throw new Error(`GOAL API returned no competitive competitions for ${goalSeasonLabel(runtimeConfig.season)}.`)
+  }
+  return competitions.sort((left, right) => left.providerLeagueId - right.providerLeagueId)
+}
+
+function goalPlayerIndexes(players) {
+  const byProviderId = new Map()
+  const byProviderKey = new Map()
+  const byName = new Map()
+  for (const player of players) {
+    const numericId = positiveNumericId(player?.apiId || player?.id)
+    if (numericId) byProviderId.set(numericId, player)
+    if (player?.id) byProviderKey.set(String(player.id), numericId)
+    if (player?.name) byName.set(normalizeName(player.name), numericId)
+  }
+  return { byProviderId, byProviderKey, byName }
+}
+
+function lineupPlayerId(entry, indexes) {
+  const byKey = indexes.byProviderKey.get(String(entry?.playerId || ''))
+  if (byKey) return byKey
+  const playerKey = Number(entry?.playerKey)
+  if (Number.isInteger(playerKey) && playerKey > 0 && indexes.byProviderId.has(playerKey)) return playerKey
+  return indexes.byName.get(normalizeName(entry?.lineupPlayer)) || null
+}
+
+async function loadGoalStarts(client, fixtures, team, players) {
+  const starts = new Map()
+  const indexes = goalPlayerIndexes(players)
+  const finishedStatuses = new Set(['FINISHED', 'AFTER_ET', 'AFTER_PEN'])
+
+  for (const fixture of fixtures.filter((entry) => finishedStatuses.has(String(entry?.matchStatus)))) {
+    let body
+    try {
+      body = await client.get(`fixtures/${encodeURIComponent(goalFixtureKey(fixture))}/lineups`)
+    } catch (error) {
+      if (error instanceof GoalApiError && [403, 404].includes(error.status)) continue
+      throw error
+    }
+    if (!body.data || body.data.hasLineups === false) continue
+    const side = String(fixture?.homeTeamId) === String(team.id) ? 'home' : 'away'
+    for (const entry of body.data?.[side]?.startingLineups || []) {
+      const playerId = lineupPlayerId(entry, indexes)
+      if (playerId) starts.set(playerId, (starts.get(playerId) || 0) + 1)
+    }
+  }
+  return starts
+}
+
+async function loadGoalFixtureEvents(client, rawFixtures, adaptedFixtures, fixturesToLoad, adapterOptions) {
+  const rawById = new Map(rawFixtures.map((fixture) => [
+    positiveNumericId(fixture?.apiId || fixture?.id),
+    fixture,
+  ]))
+  const details = new Map()
+  for (const fixture of fixturesToLoad) {
+    const fixtureId = Number(fixture.fixture?.id)
+    const raw = rawById.get(fixtureId)
+    if (!raw) throw new Error(`GOAL API fixture ${fixtureId} could not be matched for event loading.`)
+    const expectedGoals = Number(fixture.goals?.home || 0) + Number(fixture.goals?.away || 0)
+    let events = []
+    if (expectedGoals > 0) {
+      const body = await client.get(`fixtures/${encodeURIComponent(goalFixtureKey(raw))}/events`)
+      events = Array.isArray(body.data) ? body.data : []
+    }
+    const detail = adaptGoalFixture({ ...raw, events }, adapterOptions)
+    if (expectedGoals > 0 && mapGoalEvents(detail.events).length < expectedGoals) {
+      throw new Error(`Goal events for completed GOAL API fixture ${fixtureId} are not available yet.`)
+    }
+    details.set(fixtureId, detail)
+  }
+  return mergeFixtureDetails(adaptedFixtures, details)
+}
+
+function mergeGoalPlayerStats(currentStats, previousStats) {
+  const previousById = new Map(previousStats.map((entry) => [String(entry.playerId), entry]))
+  const merged = currentStats.map((entry) => {
+    const previous = previousById.get(String(entry.playerId))
+    previousById.delete(String(entry.playerId))
+    if (!previous) return entry
+    return {
+      ...entry,
+      appearances: Math.max(entry.appearances, previous.appearances),
+      starts: Math.min(Math.max(entry.starts, previous.starts), Math.max(entry.appearances, previous.appearances)),
+      minutes: Math.max(entry.minutes, previous.minutes),
+      goals: Math.max(entry.goals, previous.goals),
+      assists: Math.max(entry.assists, previous.assists),
+    }
+  })
+  return [...merged, ...previousById.values()].sort((left, right) => String(left.playerId).localeCompare(
+    String(right.playerId),
+    undefined,
+    { numeric: true },
+  ))
+}
+
+function competitionForm(results, providerLeagueId) {
+  return results
+    .filter((result) => Number(result.providerLeagueId) === Number(providerLeagueId))
+    .slice(0, 5)
+    .reverse()
+    .map((result) => result.outcome)
+    .filter((value) => ['W', 'D', 'L'].includes(value))
+}
+
+async function fetchBarcaStandings(runtimeConfig, competitionCode) {
+  const url = new URL('/api/standings', `${runtimeConfig.barcaBaseUrl.replace(/\/$/, '')}/`)
+  url.searchParams.set('competition', competitionCode)
+  url.searchParams.set('season', String(runtimeConfig.season))
+  let requests = 0
+
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 20_000)
+    try {
+      requests += 1
+      const response = await fetch(url, { signal: controller.signal })
+      const body = await response.json()
+      if (!response.ok || !Array.isArray(body?.data)) {
+        const error = new Error(`Barça API standings request failed with HTTP ${response.status}.`)
+        error.status = response.status
+        throw error
+      }
+      return { rows: body.data, requests }
+    } catch (error) {
+      const retryable = error?.status === undefined || error.status >= 500
+      if (retryable && attempt < 2) continue
+      throw new Error(`Could not load fallback Champions League standings: ${error.message}`, { cause: error })
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+  return { rows: [], requests }
+}
+
+async function buildGoalCandidate({ snapshot, runtimeConfig, options, checkedAt }) {
+  if (!runtimeConfig.goalApiKey) {
+    throw new Error('Set GOAL_API_KEY in .env locally or as a GitHub Actions secret.')
+  }
+  const client = createGoalApiClient({
+    apiKey: runtimeConfig.goalApiKey,
+    baseUrl: runtimeConfig.goalBaseUrl,
+  })
+  const team = await resolveGoalTeam(client, runtimeConfig, snapshot, options)
+  const teamNumericId = positiveNumericId(team.apiId)
+  const range = goalSeasonRange(runtimeConfig.season)
+  const rawFixtures = (await client.getAll('fixtures', {
+    teamId: team.id,
+    ...range,
+  })).filter((fixture) => goalFixtureBelongsToSeason(fixture, runtimeConfig.season))
+  if (rawFixtures.length === 0) throw new Error('GOAL API returned no Barcelona fixtures for the configured season.')
+
+  const competitions = await discoverGoalCompetitions(client, rawFixtures, runtimeConfig, snapshot, options)
+  const competitionByKey = new Map(competitions.map((competition) => [String(competition.providerKey), competition]))
+  const relevantRawFixtures = rawFixtures.filter((fixture) => competitionByKey.has(goalFixtureLeagueKey(fixture)))
+  const adapterOptions = {
+    teamProviderId: team.id,
+    teamNumericId,
+    leagueByProviderId: competitionByKey,
+    playerByName: new Map(),
+  }
+  const adaptedFixtures = relevantRawFixtures.map((fixture) => adaptGoalFixture(fixture, adapterOptions))
+  const providerRuntimeConfig = {
+    ...runtimeConfig,
+    teamId: teamNumericId,
+    providerName: 'goal-api',
+    providerLabel: 'GOAL API',
+  }
+  assertCompleteSeasonResponse(adaptedFixtures, snapshot, providerRuntimeConfig)
+
+  const sameSeason = Number(snapshot.source?.season) === runtimeConfig.season
+  const previousResults = sameSeason ? snapshot.results : []
+  const previousFixtures = sameSeason ? snapshot.fixtures : []
+  const previousPlayerStats = sameSeason ? snapshot.playerStats : []
+  const changedFinishedFixtures = adaptedFixtures.filter((fixture) => (
+    FINISHED_STATUSES.has(fixture.fixture?.status?.short)
+    && scoreChanged(fixture, findExistingEntry(fixture, previousResults))
+  ))
+  if (options.mode === 'scheduled' && changedFinishedFixtures.length === 0) {
+    return {
+      candidate: null,
+      client,
+      message: 'The monitored match is not final yet, or it was already imported. Nothing changed.',
+      publicRequests: 0,
+    }
+  }
+
+  let goalPlayers = await client.getAll(`teams/${encodeURIComponent(team.id)}/players`)
+  if (goalPlayers.length === 0) goalPlayers = await client.getAll('players', { teamId: team.id })
+  if (goalPlayers.length === 0 && previousPlayerStats.length > 0) {
+    throw new Error('GOAL API returned an empty Barcelona player feed; the current statistics were preserved.')
+  }
+  const startsByProviderId = await loadGoalStarts(client, relevantRawFixtures, team, goalPlayers)
+  const primaryLeagueId = competitions.find((competition) => competition.id === 'la-liga')?.providerLeagueId
+    || competitions[0].providerLeagueId
+  const providerRows = adaptGoalPlayers(goalPlayers, {
+    teamNumericId,
+    leagueNumericId: primaryLeagueId,
+    startsByProviderId,
+  })
+  const priorMappings = snapshot.source?.name === 'goal-api'
+    ? snapshot.providerMappings?.players || {}
+    : {}
+  const playerMapping = mapProviderPlayers(providerRows, localPlayers, priorMappings)
+  const playerIndexes = goalPlayerIndexes(goalPlayers)
+  const playerByName = new Map([...playerIndexes.byName].map(([name, id]) => [name, { id }]))
+
+  const recentFinishedFixtures = options.mode === 'full'
+    ? adaptedFixtures
+        .filter((fixture) => FINISHED_STATUSES.has(fixture.fixture?.status?.short))
+        .sort((left, right) => Date.parse(right.fixture?.date) - Date.parse(left.fixture?.date))
+        .slice(0, 3)
+    : []
+  const detailFixtures = [...new Map(
+    [...changedFinishedFixtures, ...recentFinishedFixtures]
+      .map((fixture) => [Number(fixture.fixture?.id), fixture]),
+  ).values()]
+  const fixturesWithDetails = await loadGoalFixtureEvents(
+    client,
+    relevantRawFixtures,
+    adaptedFixtures,
+    detailFixtures,
+    { ...adapterOptions, playerByName },
+  )
+  const competitionByLeagueId = new Map(competitions.map((competition) => [
+    Number(competition.providerLeagueId),
+    competition,
+  ]))
+  const normalizedMatches = fixtureToSnapshotEntries(fixturesWithDetails, {
+    teamId: teamNumericId,
+    competitionByLeagueId,
+    existingResults: previousResults,
+    existingFixtures: previousFixtures,
+    resolvePlayerId: playerMapping.resolvePlayerId,
+  })
+  let playerStats = aggregatePlayerStats(providerRows, {
+    teamId: teamNumericId,
+    leagueIds: new Set([Number(primaryLeagueId)]),
+    resolvePlayerId: playerMapping.resolvePlayerId,
+  })
+  playerStats = mergeGoalPlayerStats(playerStats, previousPlayerStats)
+  if (playerStats.length === 0 && previousPlayerStats.length > 0) {
+    throw new Error('No usable GOAL API player statistics were returned; the current snapshot was preserved.')
+  }
+
+  const standings = []
+  let publicRequests = 0
+  for (const competition of competitions.filter((entry) => entry.hasStandings)) {
+    const form = competitionForm(normalizedMatches.results, competition.providerLeagueId)
+    let normalizedResponse = null
+    let standingCompetition = competition
+    try {
+      const body = await client.get(`standings/${encodeURIComponent(competition.providerKey)}`)
+      if (Array.isArray(body.data) && body.data.length > 0) {
+        normalizedResponse = adaptGoalStandings(body.data, {
+          teamNumericId,
+          teamProviderId: team.id,
+          competition,
+          form,
+        })
+        standingCompetition = {
+          ...competition,
+          sourceLabel: 'GOAL API standings',
+          sourceUrl: 'https://goal-api.com/coverage',
+        }
+      }
+    } catch (error) {
+      const expectedUnavailable = competition.id === 'champions-league'
+        && error instanceof GoalApiError
+        && [403, 404].includes(error.status)
+      if (!expectedUnavailable) throw error
+    }
+
+    if (!normalizedResponse && competition.id === 'champions-league') {
+      const fallback = await fetchBarcaStandings(runtimeConfig, 'UCL')
+      publicRequests += fallback.requests
+      normalizedResponse = adaptBarcaStandings(fallback.rows, {
+        teamNumericId,
+        teamProviderId: team.id,
+        competition,
+        form,
+      })
+    }
+
+    const standing = normalizedResponse
+      ? normalizeStandings(normalizedResponse, { teamId: teamNumericId, competition: standingCompetition })
+      : null
+    if (!standing) {
+      const competitionHasResults = normalizedMatches.results.some(
+        (result) => Number(result.providerLeagueId) === Number(competition.providerLeagueId),
+      )
+      if (competitionHasResults) throw new Error(`${competition.name} standings did not contain Barcelona.`)
+      continue
+    }
+    standings.push(standing)
+  }
+
+  assertFreshStandings(standings, normalizedMatches.results, competitions)
+  assertFreshPlayerStats(playerStats, normalizedMatches.results, competitions)
+  const previousVerificationIsCurrent = snapshot.source?.name === 'goal-api'
+    && String(snapshot.source?.teamProviderId) === String(team.id)
+  return {
+    client,
+    publicRequests,
+    candidate: {
+      schemaVersion: 1,
+      generatedAt: checkedAt,
+      source: {
+        name: 'goal-api',
+        teamId: teamNumericId,
+        teamProviderId: team.id,
+        season: runtimeConfig.season,
+        teamVerified: true,
+        teamVerifiedAt: previousVerificationIsCurrent ? snapshot.source.teamVerifiedAt : checkedAt,
+        teamName: team.name,
+        teamCountry: team.country,
+        competitions,
+        lastSuccessfulSync: checkedAt,
+        requestsUsed: client.getRequestCount(),
+        publicRequestsUsed: publicRequests,
+      },
+      providerMappings: {
+        ...(snapshot.providerMappings || {}),
+        players: playerMapping.mappings,
+      },
+      providerPlayers: playerMapping.providerPlayers,
+      results: normalizedMatches.results,
+      fixtures: normalizedMatches.fixtures,
+      playerStats,
+      standings,
+    },
+  }
+}
+
 async function main() {
   const options = parseArguments(process.argv.slice(2))
   await loadLocalEnvironment()
@@ -388,6 +850,33 @@ async function main() {
     return
   }
 
+  const checkedAt = options.now.toISOString()
+  if (runtimeConfig.provider === 'goal-api') {
+    const result = await buildGoalCandidate({ snapshot, runtimeConfig, options, checkedAt })
+    if (!result.candidate) {
+      console.log(result.message)
+      reportRequestCount(result.client)
+      return
+    }
+    validateSnapshot(result.candidate)
+    if (!hasCanonicalChanges(snapshot, result.candidate)) {
+      console.log('GOAL API data matches the current snapshot; no file was written.')
+      reportRequestCount(result.client)
+      return
+    }
+    if (options.dryRun) {
+      console.log('Validated GOAL API changes successfully (dry run); no file was written.')
+    } else {
+      await writeSnapshotAtomically(result.candidate)
+      console.log(`Updated ${path.relative(PROJECT_ROOT, SNAPSHOT_PATH)} safely.`)
+    }
+    reportRequestCount(result.client)
+    if (result.publicRequests > 0) {
+      console.log(`Public standings fallback requests used: ${result.publicRequests}`)
+    }
+    return
+  }
+
   if (!runtimeConfig.apiKey) {
     throw new Error('Set API_FOOTBALL_KEY in .env locally or as a GitHub Actions secret.')
   }
@@ -396,7 +885,6 @@ async function main() {
     apiKey: runtimeConfig.apiKey,
     baseUrl: runtimeConfig.baseUrl,
   })
-  const checkedAt = options.now.toISOString()
   const previousResults = sameSeason ? snapshot.results : []
   const previousFixtures = sameSeason ? snapshot.fixtures : []
   const previousPlayerStats = sameSeason ? snapshot.playerStats : []
