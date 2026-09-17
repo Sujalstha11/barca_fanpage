@@ -34,15 +34,27 @@ function opponentId(name) {
   return 600 + [...name].reduce((total, character) => total + character.codePointAt(0), 0)
 }
 
+function normalizedSnapshotPlayerReference(value) {
+  return String(value ?? '').trim().replace(/^api-/i, '')
+}
+
 function providerPlayerId(snapshotId) {
-  if (Number.isInteger(Number(snapshotId)) && Number(snapshotId) > 0) {
-    return 10_000 + Number(snapshotId)
+  const normalizedId = normalizedSnapshotPlayerReference(snapshotId)
+  if (!normalizedId) return null
+  if (/^\d+$/.test(normalizedId) && Number(normalizedId) > 0) {
+    return 10_000 + Number(normalizedId)
   }
-  return 20_000 + [...String(snapshotId)].reduce(
+  return 20_000 + [...normalizedId].reduce(
     (total, character) => (Math.imul(total, 31) + character.codePointAt(0)) >>> 0,
     7,
   )
 }
+
+test('provider fixture mocks preserve player identities without inventing missing ids', () => {
+  assert.equal(providerPlayerId('api-9877550'), providerPlayerId(9877550))
+  assert.equal(providerPlayerId(null), null)
+  assert.equal(providerPlayerId(undefined), null)
+})
 
 function apiTeam(name, code) {
   return code === 'BAR'
@@ -50,7 +62,7 @@ function apiTeam(name, code) {
     : { id: opponentId(name), name }
 }
 
-function apiEvent(goal, entry, index) {
+function apiEvent(goal, entry) {
   const [elapsed, extra] = String(goal.minute).split('+').map(Number)
   let eventTeam = goal.teamCode === entry.homeCode
     ? apiTeam(entry.home, entry.homeCode)
@@ -60,7 +72,7 @@ function apiEvent(goal, entry, index) {
       ? apiTeam(entry.away, entry.awayCode)
       : apiTeam(entry.home, entry.homeCode)
   }
-  const scorerProviderId = providerPlayerId(goal.scorerId) || 80_000 + index
+  const scorerProviderId = providerPlayerId(goal.scorerId)
   const assistProviderId = providerPlayerId(goal.assistId)
   const details = {
     penalty: 'Penalty',
@@ -72,7 +84,7 @@ function apiEvent(goal, entry, index) {
     time: { elapsed, extra: extra || null },
     team: eventTeam,
     player: { id: scorerProviderId, name: goal.scorer },
-    assist: goal.assist ? { id: assistProviderId || 90_000 + index, name: goal.assist } : { id: null, name: null },
+    assist: goal.assist ? { id: assistProviderId, name: goal.assist } : { id: null, name: null },
     type: 'Goal',
     detail: details[goal.type] || 'Normal Goal',
   }
@@ -107,7 +119,7 @@ function apiFixture(entry, index, includeEvents = false) {
       away: finished ? entry.awayScore : null,
     },
     ...(includeEvents && finished
-      ? { events: entry.goals.map((goal, goalIndex) => apiEvent(goal, entry, (index * 100) + goalIndex)) }
+      ? { events: entry.goals.map((goal) => apiEvent(goal, entry)) }
       : {}),
   }
 }
@@ -140,12 +152,13 @@ const detailedFixtures = [
 
 function minimumRecordedContributions(playerId) {
   const totals = { goals: 0, assists: 0 }
+  const normalizedPlayerId = normalizedSnapshotPlayerReference(playerId)
   for (const result of snapshot.results) {
     if (!apiFootballLeagueIds.has(String(result.competition).toLowerCase())) continue
     for (const goal of result.goals || []) {
       if (goal.teamCode !== 'BAR' || goal.type === 'own-goal') continue
-      if (String(goal.scorerId) === String(playerId)) totals.goals += 1
-      if (String(goal.assistId) === String(playerId)) totals.assists += 1
+      if (normalizedSnapshotPlayerReference(goal.scorerId) === normalizedPlayerId) totals.goals += 1
+      if (normalizedSnapshotPlayerReference(goal.assistId) === normalizedPlayerId) totals.assists += 1
     }
   }
   return totals
