@@ -237,6 +237,7 @@ test('scheduled gating uses the post-kickoff window and ignores ordinary no-op r
 test('provider baselines reject a response that silently drops the future schedule', () => {
   const baseline = structuredClone(snapshot)
   baseline.source.name = 'api-football'
+  baseline.source.teamId = 529
   baseline.results.forEach((result, index) => { result.providerId = 1000 + index })
   baseline.fixtures.forEach((fixture, index) => { fixture.providerId = 2000 + index })
   const resultFixtures = baseline.results.map((result) => ({

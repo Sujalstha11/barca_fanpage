@@ -34,10 +34,7 @@ function opponentId(name) {
   return 600 + [...name].reduce((total, character) => total + character.codePointAt(0), 0)
 }
 
-function providerPlayerId(snapshotId, player = snapshotPlayerById.get(String(snapshotId))) {
-  if (Number.isInteger(Number(player?.providerId)) && Number(player.providerId) > 0) {
-    return Number(player.providerId)
-  }
+function providerPlayerId(snapshotId) {
   if (Number.isInteger(Number(snapshotId)) && Number(snapshotId) > 0) {
     return 10_000 + Number(snapshotId)
   }
@@ -164,7 +161,7 @@ function playerRows() {
     const contributions = minimumRecordedContributions(stat.playerId)
     return {
       player: {
-        id: providerPlayerId(stat.playerId, player),
+        id: providerPlayerId(stat.playerId),
         name: player.name,
         firstname: player.name.split(' ')[0],
         lastname: player.name.split(' ').slice(1).join(' '),

@@ -374,7 +374,12 @@ function assertFreshPlayerStats(playerStats, results, competitions) {
   for (const [playerId, contribution] of expected) {
     const statistics = statsByPlayer.get(playerId)
     if (!statistics || statistics.goals < contribution.goals || statistics.assists < contribution.assists) {
-      throw new Error(`Player statistics are not caught up for ${playerId}; the current snapshot was preserved.`)
+      const actual = statistics
+        ? `${statistics.goals} goals/${statistics.assists} assists`
+        : 'no statistics row'
+      throw new Error(
+        `Player statistics are not caught up for ${playerId} (${actual}; expected at least ${contribution.goals} goals/${contribution.assists} assists); the current snapshot was preserved.`,
+      )
     }
   }
 }
@@ -985,10 +990,13 @@ async function main() {
     throw new Error('API-Football returned an empty player feed; the current player statistics were preserved.')
   }
 
+  const priorMappings = snapshot.source?.name === 'api-football'
+    ? snapshot.providerMappings?.players || {}
+    : {}
   const playerMapping = mapProviderPlayers(
     providerRows,
     localPlayers,
-    snapshot.providerMappings?.players || {},
+    priorMappings,
   )
   const playerStats = aggregatePlayerStats(providerRows, {
     teamId: runtimeConfig.teamId,
