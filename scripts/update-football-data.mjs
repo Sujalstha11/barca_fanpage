@@ -120,7 +120,8 @@ function competitionFromLeagueRow(leagueRow, season) {
 
 async function verifyTeam(client, runtimeConfig, existingSource, checkedAt) {
   if (
-    existingSource?.teamVerified === true
+    existingSource?.name === 'api-football'
+    && existingSource?.teamVerified === true
     && Number(existingSource.teamId) === runtimeConfig.teamId
     && existingSource.teamName === runtimeConfig.teamName
     && existingSource.teamCountry === runtimeConfig.teamCountry
@@ -172,6 +173,7 @@ async function discoverCompetitions(client, runtimeConfig) {
 }
 
 function existingCompetitions(snapshot, runtimeConfig) {
+  if (snapshot.source?.name !== 'api-football') return null
   if (Number(snapshot.source?.season) !== runtimeConfig.season) return null
   const competitions = snapshot.source?.competitions
   if (!Array.isArray(competitions) || competitions.length === 0) return null

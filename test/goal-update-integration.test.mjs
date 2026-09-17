@@ -86,7 +86,7 @@ function goalFixture(entry, index) {
   const competition = competitionDetails(entry.competition)
   return {
     id: `fixture-${index + 1}`,
-    apiId: 30_000 + index,
+    apiId: Number(entry.providerId) || 30_000 + index,
     kickoffUtc: entry.kickoff || `${entry.date}T19:00:00Z`,
     leagueId: competition.id,
     leagueName: competition.name,
@@ -259,7 +259,7 @@ test('full GOAL provider update uses authenticated data and the public UCL fallb
       body = goalWrapper({ id: 'ucl', apiId: 3, name: 'Champions League' })
     } else if (url.pathname === `/v1/teams/${goalTeam.id}/players`) {
       body = listWrapper(goalPlayers)
-    } else if (/^\/v1\/players\/player-\d+\/statistics$/.test(url.pathname)) {
+    } else if (/^\/v1\/players\/[^/]+\/statistics$/.test(url.pathname)) {
       const playerId = url.pathname.split('/')[3]
       const performance = goalPerformanceByPlayerId.get(playerId)
       body = goalWrapper({
@@ -323,12 +323,20 @@ test('full GOAL provider update uses authenticated data and the public UCL fallb
   assert.ok(calls.some((call) => call.pathname === '/v1/leagues/ucl'))
   assert.ok(calls.some((call) => call.pathname === `/v1/teams/${goalTeam.id}/players`))
   assert.equal(
-    calls.filter((call) => /^\/v1\/players\/player-\d+\/statistics$/.test(call.pathname)).length,
+    calls.filter((call) => /^\/v1\/players\/[^/]+\/statistics$/.test(call.pathname)).length,
     goalPlayers.length,
   )
   assert.ok(goalCalls.length < 1_000)
   assert.equal(calls.filter((call) => /\/lineups$/.test(call.pathname)).length, snapshot.results.length)
-  assert.equal(calls.filter((call) => /\/events$/.test(call.pathname)).length, snapshot.results.length)
+  const detailedResults = snapshot.source?.name === 'goal-api'
+    ? [...snapshot.results]
+        .sort((left, right) => Date.parse(right.date) - Date.parse(left.date))
+        .slice(0, 3)
+    : snapshot.results
+  assert.equal(
+    calls.filter((call) => /\/events$/.test(call.pathname)).length,
+    detailedResults.filter((entry) => Number(entry.homeScore) + Number(entry.awayScore) > 0).length,
+  )
   assert.ok(calls.some((call) => call.pathname === '/v1/standings/lal'))
   assert.ok(calls.some((call) => call.pathname === '/v1/standings/ucl'))
   assert.deepEqual(publicCalls.map(({ pathname, query }) => ({ pathname, query })), [{
