@@ -723,9 +723,10 @@ async function buildGoalCandidate({ snapshot, runtimeConfig, options, checkedAt 
   const previousResults = sameSeason ? snapshot.results : []
   const previousFixtures = sameSeason ? snapshot.fixtures : []
   const previousPlayerStats = sameSeason ? snapshot.playerStats : []
+  const providerChanged = snapshot.source?.name !== 'goal-api'
   const changedFinishedFixtures = adaptedFixtures.filter((fixture) => (
     FINISHED_STATUSES.has(fixture.fixture?.status?.short)
-    && scoreChanged(fixture, findExistingEntry(fixture, previousResults))
+    && (providerChanged || scoreChanged(fixture, findExistingEntry(fixture, previousResults)))
   ))
   if (options.mode === 'scheduled' && changedFinishedFixtures.length === 0) {
     return {
@@ -960,9 +961,10 @@ async function main() {
   if (apiFixtures.length === 0) throw new Error('API-Football returned no season fixtures for the selected competitions.')
   assertCompleteSeasonResponse(apiFixtures, snapshot, runtimeConfig)
 
+  const providerChanged = snapshot.source?.name !== 'api-football'
   const changedFinishedFixtures = apiFixtures.filter((fixture) => {
     if (!FINISHED_STATUSES.has(fixture.fixture?.status?.short)) return false
-    return scoreChanged(fixture, findExistingEntry(fixture, previousResults))
+    return providerChanged || scoreChanged(fixture, findExistingEntry(fixture, previousResults))
   })
 
   if (options.mode === 'scheduled' && changedFinishedFixtures.length === 0) {
