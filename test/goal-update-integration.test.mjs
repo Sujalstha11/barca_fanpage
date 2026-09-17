@@ -13,7 +13,10 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const snapshotPath = path.join(projectRoot, 'src', 'data', 'generated', 'snapshot.json')
 const updaterPath = path.join(projectRoot, 'scripts', 'update-football-data.mjs')
 const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8'))
-const localPlayerById = new Map(players.map((player) => [player.id, player]))
+const snapshotPlayerById = new Map([
+  ...players,
+  ...(snapshot.providerPlayers || []),
+].map((player) => [String(player.id), player]))
 const goalTeam = { id: 'barcelona-team', apiId: 529, name: 'Barcelona', country: 'Spain' }
 
 function goalWrapper(data, pagination = null) {
@@ -23,14 +26,23 @@ function goalWrapper(data, pagination = null) {
 function listWrapper(data) {
   return goalWrapper(data, {
     total: data.length,
-    limit: 500,
+    limit: 50,
     offset: 0,
     hasMore: false,
   })
 }
 
-function providerPlayerId(localId) {
-  return 10_000 + Number(localId)
+function providerPlayerId(snapshotId, player = snapshotPlayerById.get(String(snapshotId))) {
+  if (Number.isInteger(Number(player?.providerId)) && Number(player.providerId) > 0) {
+    return Number(player.providerId)
+  }
+  if (Number.isInteger(Number(snapshotId)) && Number(snapshotId) > 0) {
+    return 10_000 + Number(snapshotId)
+  }
+  return 20_000 + [...String(snapshotId)].reduce(
+    (total, character) => (Math.imul(total, 31) + character.codePointAt(0)) >>> 0,
+    7,
+  )
 }
 
 function providerPlayerKey(localId) {
@@ -120,10 +132,14 @@ function goalEvent(entry, goal) {
 }
 
 const goalPlayers = snapshot.playerStats.map((stat) => {
-  const player = localPlayerById.get(Number(stat.playerId))
+  const player = snapshotPlayerById.get(String(stat.playerId)) || {
+    name: `Player ${stat.playerId}`,
+    number: '—',
+    position: 'Player',
+  }
   return {
     id: providerPlayerKey(stat.playerId),
-    apiId: providerPlayerId(stat.playerId),
+    apiId: providerPlayerId(stat.playerId, player),
     name: player.name,
     number: player.number,
     type: player.position,

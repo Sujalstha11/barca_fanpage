@@ -8,6 +8,7 @@ on:
       - '.github/workflows/update-football-data.yml'
       - 'scripts/update-football-data.mjs'
       - 'scripts/football-data/**'
+      - 'test/**'
   schedule:
     # Offset from the top of the hour to reduce scheduler congestion.
     - cron: '7,37 * * * *'

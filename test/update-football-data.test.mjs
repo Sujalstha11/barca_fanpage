@@ -12,23 +12,39 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const snapshotPath = path.join(projectRoot, 'src', 'data', 'generated', 'snapshot.json')
 const updaterPath = path.join(projectRoot, 'scripts', 'update-football-data.mjs')
 const snapshot = JSON.parse(await readFile(snapshotPath, 'utf8'))
-const localPlayerById = new Map(players.map((player) => [player.id, player]))
+const snapshotPlayerById = new Map([
+  ...players,
+  ...(snapshot.providerPlayers || []),
+].map((player) => [String(player.id), player]))
+const apiFootballLeagueIds = new Map([
+  ['la liga', 140],
+  ['champions league', 2],
+])
 
 function responseWrapper(response, paging = { current: 1, total: 1 }) {
   return { get: '', parameters: {}, errors: [], results: response.length, paging, response }
 }
 
 function leagueIdFor(entry) {
-  return entry.providerLeagueId
-    || snapshot.standings.find((standing) => standing.competition === entry.competition)?.providerLeagueId
+  return apiFootballLeagueIds.get(String(entry.competition).toLowerCase())
+    || entry.providerLeagueId
 }
 
 function opponentId(name) {
   return 600 + [...name].reduce((total, character) => total + character.codePointAt(0), 0)
 }
 
-function providerPlayerId(localId) {
-  return Number.isInteger(localId) ? 10_000 + localId : null
+function providerPlayerId(snapshotId, player = snapshotPlayerById.get(String(snapshotId))) {
+  if (Number.isInteger(Number(player?.providerId)) && Number(player.providerId) > 0) {
+    return Number(player.providerId)
+  }
+  if (Number.isInteger(Number(snapshotId)) && Number(snapshotId) > 0) {
+    return 10_000 + Number(snapshotId)
+  }
+  return 20_000 + [...String(snapshotId)].reduce(
+    (total, character) => (Math.imul(total, 31) + character.codePointAt(0)) >>> 0,
+    7,
+  )
 }
 
 function apiTeam(name, code) {
@@ -127,10 +143,14 @@ const detailedFixtures = [
 
 function playerRows() {
   return snapshot.playerStats.map((stat) => {
-    const player = localPlayerById.get(stat.playerId)
+    const player = snapshotPlayerById.get(String(stat.playerId)) || {
+      name: `Player ${stat.playerId}`,
+      number: '—',
+      position: 'Player',
+    }
     return {
       player: {
-        id: providerPlayerId(stat.playerId),
+        id: providerPlayerId(stat.playerId, player),
         name: player.name,
         firstname: player.name.split(' ')[0],
         lastname: player.name.split(' ').slice(1).join(' '),
@@ -153,7 +173,11 @@ function playerRows() {
 }
 
 function standingsResponse(providerLeagueId) {
-  const standing = snapshot.standings.find((entry) => entry.providerLeagueId === providerLeagueId)
+  const competitionName = [...apiFootballLeagueIds.entries()]
+    .find(([, id]) => id === providerLeagueId)?.[0]
+  const standing = snapshot.standings.find(
+    (entry) => String(entry.id).replaceAll('-', ' ') === competitionName,
+  )
   const rows = Array.from({ length: standing.totalTeams }, (_, index) => {
     const rank = index + 1
     return {
@@ -196,7 +220,7 @@ function standingsResponse(providerLeagueId) {
 function leaguesResponse() {
   return snapshot.standings.map((standing) => ({
     league: {
-      id: standing.providerLeagueId,
+      id: apiFootballLeagueIds.get(String(standing.id).replaceAll('-', ' ')),
       name: standing.competition,
       type: 'League',
     },
