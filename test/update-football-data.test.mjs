@@ -141,6 +141,19 @@ const detailedFixtures = [
   ...knockoutFixtures,
 ]
 
+function minimumRecordedContributions(playerId) {
+  const totals = { goals: 0, assists: 0 }
+  for (const result of snapshot.results) {
+    if (!apiFootballLeagueIds.has(String(result.competition).toLowerCase())) continue
+    for (const goal of result.goals || []) {
+      if (goal.teamCode !== 'BAR' || goal.type === 'own-goal') continue
+      if (String(goal.scorerId) === String(playerId)) totals.goals += 1
+      if (String(goal.assistId) === String(playerId)) totals.assists += 1
+    }
+  }
+  return totals
+}
+
 function playerRows() {
   return snapshot.playerStats.map((stat) => {
     const player = snapshotPlayerById.get(String(stat.playerId)) || {
@@ -148,6 +161,7 @@ function playerRows() {
       number: '—',
       position: 'Player',
     }
+    const contributions = minimumRecordedContributions(stat.playerId)
     return {
       player: {
         id: providerPlayerId(stat.playerId, player),
@@ -166,7 +180,10 @@ function playerRows() {
           number: player.number,
           position: player.position,
         },
-        goals: { total: stat.goals, assists: stat.assists },
+        goals: {
+          total: Math.max(stat.goals, contributions.goals),
+          assists: Math.max(stat.assists, contributions.assists),
+        },
       }],
     }
   })

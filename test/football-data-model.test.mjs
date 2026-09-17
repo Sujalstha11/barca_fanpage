@@ -256,7 +256,7 @@ test('provider baselines reject a response that silently drops the future schedu
 })
 
 test('standings freshness ignores knockout matches after a capped table phase', () => {
-  const standing = { ...snapshot.standings[1], played: 1 }
+  const standing = { ...snapshot.standings[1], providerLeagueId: 2, played: 1 }
   const competition = { providerLeagueId: 2, totalMatchdays: 8 }
   const results = [
     { providerLeagueId: 2, round: 'League phase · Matchday 1' },
