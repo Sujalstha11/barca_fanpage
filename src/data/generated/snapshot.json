@@ -1,18 +1,335 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-17T14:54:52.000Z",
+  "generatedAt": "2026-09-17T17:22:16.407Z",
   "source": {
-    "name": "manual",
-    "teamId": 529,
-    "season": 2026
+    "name": "goal-api",
+    "teamId": 97,
+    "teamProviderId": "cmr7m55u15efyrx06ndeg0510",
+    "season": 2026,
+    "teamVerified": true,
+    "teamVerifiedAt": "2026-09-17T17:22:16.407Z",
+    "teamName": "Barcelona",
+    "teamCountry": "Spain",
+    "competitions": [
+      {
+        "providerLeagueId": 3,
+        "providerKey": "cmr77dw3900f5rx06j05wgzv4",
+        "id": "champions-league",
+        "name": "Champions League",
+        "type": "League",
+        "season": "2026/27",
+        "hasStandings": true,
+        "hasEvents": true,
+        "hasPlayerStats": true,
+        "totalMatchdays": 8,
+        "sourceLabel": "Barça API standings",
+        "sourceUrl": "https://api.fc-barcelona.app/en/docs"
+      },
+      {
+        "providerLeagueId": 302,
+        "providerKey": "cmr77dvnt006nrx063v3w622e",
+        "id": "la-liga",
+        "name": "La Liga",
+        "type": "League",
+        "season": "2026/27",
+        "hasStandings": true,
+        "hasEvents": true,
+        "hasPlayerStats": true,
+        "totalMatchdays": 38,
+        "sourceLabel": "GOAL API standings",
+        "sourceUrl": "https://goal-api.com/coverage/spain-la-liga-api"
+      }
+    ],
+    "lastSuccessfulSync": "2026-09-17T17:22:16.407Z",
+    "requestsUsed": 47,
+    "publicRequestsUsed": 0
   },
   "providerMappings": {
-    "players": {}
+    "players": {
+      "101462621": 23,
+      "253565970": 4,
+      "387343321": 5,
+      "1547105802": 9,
+      "1576307869": 8,
+      "1790385112": 14,
+      "2461586492": 10,
+      "2504847943": 26,
+      "2622952689": 19,
+      "2868581870": 27,
+      "3932445726": 2,
+      "4107561274": 25
+    }
   },
-  "providerPlayers": [],
+  "providerPlayers": [
+    {
+      "id": "api-27944123",
+      "providerId": 27944123,
+      "name": "Eder Aller",
+      "shortName": "Eder Aller",
+      "number": 31,
+      "position": "Goalkeepers",
+      "role": "Goalkeepers",
+      "image": "https://media.goal-api.com/badges/players/321634_e-aller.jpg",
+      "localPlayerId": null
+    },
+    {
+      "id": "api-101462621",
+      "providerId": 101462621,
+      "name": "Karim Adeyemi",
+      "shortName": "Adeyemi",
+      "number": 14,
+      "position": "Forwards",
+      "role": "Left wing",
+      "image": "https://media.goal-api.com/badges/players/96466_k-adeyemi.jpg",
+      "localPlayerId": 23
+    },
+    {
+      "id": "api-116505656",
+      "providerId": 116505656,
+      "name": "Jordi Pesquer",
+      "shortName": "Jordi Pesquer",
+      "number": 33,
+      "position": "Defenders",
+      "role": "Defenders",
+      "image": "https://media.goal-api.com/badges/players/399580_jordi-pesquer.jpg",
+      "localPlayerId": null
+    },
+    {
+      "id": "api-253565970",
+      "providerId": 253565970,
+      "name": "Joao Cancelo",
+      "shortName": "Cancelo",
+      "number": 2,
+      "position": "Defenders",
+      "role": "Right back",
+      "image": "https://media.goal-api.com/badges/players/10435_j-cancelo.jpg",
+      "localPlayerId": 4
+    },
+    {
+      "id": "api-276789673",
+      "providerId": 276789673,
+      "name": "Hansi Flick",
+      "shortName": "Hansi Flick",
+      "number": "—",
+      "position": "Player",
+      "role": "Player",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-387343321",
+      "providerId": 387343321,
+      "name": "Alejandro Balde",
+      "shortName": "Balde",
+      "number": 3,
+      "position": "Defenders",
+      "role": "Left back",
+      "image": "https://media.goal-api.com/badges/players/100274_a-balde.jpg",
+      "localPlayerId": 5
+    },
+    {
+      "id": "api-948941149",
+      "providerId": 948941149,
+      "name": "Jesus Gabriel",
+      "shortName": "Jesus Gabriel",
+      "number": 9,
+      "position": "Forwards",
+      "role": "Forwards",
+      "image": "https://media.goal-api.com/badges/players/50186_j-gabriel.jpg",
+      "localPlayerId": null
+    },
+    {
+      "id": "api-1197671428",
+      "providerId": 1197671428,
+      "name": "Mirza Catovic",
+      "shortName": "Mirza Catovic",
+      "number": 35,
+      "position": "Midfielders",
+      "role": "Midfielders",
+      "image": "https://media.goal-api.com/badges/players/342928_m-catovic.jpg",
+      "localPlayerId": null
+    },
+    {
+      "id": "api-1547105802",
+      "providerId": 1547105802,
+      "name": "Gerard Martin",
+      "shortName": "G. Martín",
+      "number": 18,
+      "position": "Defenders",
+      "role": "Left back",
+      "image": "https://media.goal-api.com/badges/players/132796_g-martin.jpg",
+      "localPlayerId": 9
+    },
+    {
+      "id": "api-1576307869",
+      "providerId": 1576307869,
+      "name": "Andreas Christensen",
+      "shortName": "Christensen",
+      "number": 15,
+      "position": "Defenders",
+      "role": "Centre back",
+      "image": "https://media.goal-api.com/badges/players/20327_a-christensen.jpg",
+      "localPlayerId": 8
+    },
+    {
+      "id": "api-1790385112",
+      "providerId": 1790385112,
+      "name": "Fermín",
+      "shortName": "Fermín",
+      "number": 7,
+      "position": "Midfielders",
+      "role": "Attacking midfield",
+      "image": "https://media.goal-api.com/badges/players/192384_fermin.jpg",
+      "localPlayerId": 14
+    },
+    {
+      "id": "api-1809510962",
+      "providerId": 1809510962,
+      "name": "I. Diarra",
+      "shortName": "I. Diarra",
+      "number": 28,
+      "position": "Player",
+      "role": "Player",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-1900203716",
+      "providerId": 1900203716,
+      "name": "A. Gonzalez",
+      "shortName": "A. Gonzalez",
+      "number": 23,
+      "position": "Player",
+      "role": "Player",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-2087713209",
+      "providerId": 2087713209,
+      "name": "Orian Goren",
+      "shortName": "Orian Goren",
+      "number": 16,
+      "position": "Midfielders",
+      "role": "Midfielders",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-2089304468",
+      "providerId": 2089304468,
+      "name": "Ebrima Tunkara",
+      "shortName": "Ebrima Tunkara",
+      "number": 18,
+      "position": "Midfielders",
+      "role": "Midfielders",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-2147003450",
+      "providerId": 2147003450,
+      "name": "D. Serezhkin",
+      "shortName": "D. Serezhkin",
+      "number": "—",
+      "position": "Player",
+      "role": "Player",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-2461586492",
+      "providerId": 2461586492,
+      "name": "Jules Kounde",
+      "shortName": "Koundé",
+      "number": 23,
+      "position": "Defenders",
+      "role": "Right back",
+      "image": "https://media.goal-api.com/badges/players/65273_j-kounde.jpg",
+      "localPlayerId": 10
+    },
+    {
+      "id": "api-2463598333",
+      "providerId": 2463598333,
+      "name": "Xavi",
+      "shortName": "Xavi",
+      "number": "—",
+      "position": "Player",
+      "role": "Player",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-2504847943",
+      "providerId": 2504847943,
+      "name": "Jesse Bisiwu",
+      "shortName": "Bisiwu",
+      "number": 74,
+      "position": "Forwards",
+      "role": "Right wing",
+      "image": "https://media.goal-api.com/badges/players/244915_j-bisiwu.jpg",
+      "localPlayerId": 26
+    },
+    {
+      "id": "api-2622952689",
+      "providerId": 2622952689,
+      "name": "Marc Bernal",
+      "shortName": "M. Bernal",
+      "number": 22,
+      "position": "Midfielders",
+      "role": "Defensive midfield",
+      "image": "https://media.goal-api.com/badges/players/255180_m-bernal.jpg",
+      "localPlayerId": 19
+    },
+    {
+      "id": "api-2868581870",
+      "providerId": 2868581870,
+      "name": "Hamza Abdelkarim",
+      "shortName": "Hamza",
+      "number": 29,
+      "position": "Forwards",
+      "role": "Centre forward",
+      "image": "/players/27.jpg",
+      "localPlayerId": 27
+    },
+    {
+      "id": "api-3589100860",
+      "providerId": 3589100860,
+      "name": "Toni Fernandez",
+      "shortName": "Toni Fernandez",
+      "number": 42,
+      "position": "Forwards",
+      "role": "Forwards",
+      "image": null,
+      "localPlayerId": null
+    },
+    {
+      "id": "api-3932445726",
+      "providerId": 3932445726,
+      "name": "Wojciech Szczesny",
+      "shortName": "Szczęsny",
+      "number": 13,
+      "position": "Goalkeepers",
+      "role": "Goalkeeper",
+      "image": "https://media.goal-api.com/badges/players/10227_w-szczesny.jpg",
+      "localPlayerId": 2
+    },
+    {
+      "id": "api-4107561274",
+      "providerId": 4107561274,
+      "name": "Roony Bardghji",
+      "shortName": "Bardghji",
+      "number": 19,
+      "position": "Forwards",
+      "role": "Right wing",
+      "image": "https://media.goal-api.com/badges/players/157838_r-bardghji.jpg",
+      "localPlayerId": 25
+    }
+  ],
   "results": [
     {
-      "providerId": null,
+      "providerId": 798858,
+      "providerLeagueId": 302,
       "status": "FT",
       "id": "fcb-racing-2026",
       "date": "2026-09-16",
@@ -20,17 +337,18 @@
       "homeCode": "BAR",
       "away": "Racing Santander",
       "awayCode": "RAC",
-      "homeScore": 7,
-      "awayScore": 2,
-      "venue": "Spotify Camp Nou",
+      "venue": "Camp Nou",
       "competition": "La Liga",
       "round": "Matchday 6",
+      "homeScore": 7,
+      "awayScore": 2,
+      "outcome": "W",
       "goals": [
         {
           "teamCode": "BAR",
           "minute": "8",
-          "scorer": "João Cancelo",
-          "scorerId": 4,
+          "scorer": "J. Cancelo",
+          "scorerId": null,
           "assist": "Lamine Yamal",
           "assistId": 21,
           "type": "goal"
@@ -47,34 +365,34 @@
         {
           "teamCode": "RAC",
           "minute": "30",
-          "scorer": "Maguette Gueye",
+          "scorer": "M. Gueye",
           "scorerId": null,
-          "assist": "Asier Villalibre",
+          "assist": "A. Villalibre",
           "assistId": null,
           "type": "goal"
         },
         {
           "teamCode": "BAR",
           "minute": "36",
-          "scorer": "Asier Villalibre",
+          "scorer": "A. Villalibre (o.g.)",
           "scorerId": null,
           "assist": null,
           "assistId": null,
-          "type": "own-goal"
+          "type": "goal"
         },
         {
           "teamCode": "BAR",
           "minute": "42",
           "scorer": "Raphinha",
           "scorerId": 22,
-          "assist": "Dani Olmo",
+          "assist": "D. Olmo",
           "assistId": 17,
           "type": "goal"
         },
         {
           "teamCode": "RAC",
           "minute": "65",
-          "scorer": "Yassir Zabiri",
+          "scorer": "Y. Zabiri",
           "scorerId": null,
           "assist": null,
           "assistId": null,
@@ -103,14 +421,15 @@
           "minute": "89",
           "scorer": "Lamine Yamal",
           "scorerId": 21,
-          "assist": "Karim Adeyemi",
-          "assistId": 23,
+          "assist": "K. Adeyemi",
+          "assistId": null,
           "type": "goal"
         }
       ]
     },
     {
-      "providerId": null,
+      "providerId": 798849,
+      "providerLeagueId": 302,
       "status": "FT",
       "id": "levante-fcb-2026",
       "date": "2026-09-13",
@@ -118,17 +437,18 @@
       "homeCode": "LEV",
       "away": "Barcelona",
       "awayCode": "BAR",
-      "homeScore": 2,
-      "awayScore": 4,
       "venue": "Ciutat de Valencia",
       "competition": "La Liga",
       "round": "Matchday 5",
+      "homeScore": 2,
+      "awayScore": 4,
+      "outcome": "W",
       "goals": [
         {
           "teamCode": "BAR",
           "minute": "5",
-          "scorer": "Xavi Espart",
-          "scorerId": 7,
+          "scorer": "X. Espart",
+          "scorerId": null,
           "assist": "Raphinha",
           "assistId": 22,
           "type": "goal"
@@ -154,7 +474,7 @@
         {
           "teamCode": "LEV",
           "minute": "79",
-          "scorer": "Iván Romero",
+          "scorer": "I. Romero",
           "scorerId": null,
           "assist": null,
           "assistId": null,
@@ -163,7 +483,7 @@
         {
           "teamCode": "LEV",
           "minute": "88",
-          "scorer": "Roger Brugué",
+          "scorer": "R. Brugue",
           "scorerId": null,
           "assist": null,
           "assistId": null,
@@ -172,16 +492,17 @@
         {
           "teamCode": "BAR",
           "minute": "90+3",
-          "scorer": "Karim Adeyemi",
-          "scorerId": 23,
-          "assist": "Marc Bernal",
+          "scorer": "K. Adeyemi",
+          "scorerId": null,
+          "assist": "M. Bernal",
           "assistId": 19,
           "type": "goal"
         }
       ]
     },
     {
-      "providerId": null,
+      "providerId": 853149,
+      "providerLeagueId": 3,
       "status": "FT",
       "id": "fcb-feyenoord-2026",
       "date": "2026-09-09",
@@ -189,11 +510,12 @@
       "homeCode": "BAR",
       "away": "Feyenoord",
       "awayCode": "FEY",
-      "homeScore": 5,
-      "awayScore": 1,
-      "venue": "Spotify Camp Nou",
+      "venue": "Camp Nou",
       "competition": "Champions League",
       "round": "League phase · Matchday 1",
+      "homeScore": 5,
+      "awayScore": 1,
+      "outcome": "W",
       "goals": [
         {
           "teamCode": "BAR",
@@ -207,10 +529,10 @@
         {
           "teamCode": "BAR",
           "minute": "22",
-          "scorer": "Karim Adeyemi",
-          "scorerId": 23,
-          "assist": "João Cancelo",
-          "assistId": 4,
+          "scorer": "K. Adeyemi",
+          "scorerId": null,
+          "assist": "J. Cancelo",
+          "assistId": null,
           "type": "goal"
         },
         {
@@ -229,14 +551,14 @@
           "scorerId": 21,
           "assist": null,
           "assistId": null,
-          "type": "free-kick"
+          "type": "goal"
         },
         {
           "teamCode": "FEY",
           "minute": "82",
-          "scorer": "Sem Steijn",
+          "scorer": "S. Steijn",
           "scorerId": null,
-          "assist": "Gonçalo Borges",
+          "assist": "G. Borges",
           "assistId": null,
           "type": "goal"
         },
@@ -252,7 +574,8 @@
       ]
     },
     {
-      "providerId": null,
+      "providerId": 798844,
+      "providerLeagueId": 302,
       "status": "FT",
       "id": "valencia-fcb-2026",
       "date": "2026-09-06",
@@ -260,28 +583,29 @@
       "homeCode": "VAL",
       "away": "Barcelona",
       "awayCode": "BAR",
-      "homeScore": 0,
-      "awayScore": 5,
-      "venue": "Mestalla",
+      "venue": "Estadio de Mestalla",
       "competition": "La Liga",
       "round": "Matchday 4",
+      "homeScore": 0,
+      "awayScore": 5,
+      "outcome": "W",
       "goals": [
         {
           "teamCode": "BAR",
           "minute": "6",
           "scorer": "Lamine Yamal",
           "scorerId": 21,
-          "assist": "Fermín López",
+          "assist": "Fermin",
           "assistId": 14,
           "type": "goal"
         },
         {
           "teamCode": "BAR",
           "minute": "22",
-          "scorer": "Fermín López",
+          "scorer": "Fermin",
           "scorerId": 14,
-          "assist": "Anthony Gordon",
-          "assistId": 24,
+          "assist": "A. Gordon",
+          "assistId": null,
           "type": "goal"
         },
         {
@@ -289,7 +613,7 @@
           "minute": "50",
           "scorer": "Raphinha",
           "scorerId": 22,
-          "assist": "Fermín López",
+          "assist": "Fermin",
           "assistId": 14,
           "type": "goal"
         },
@@ -298,7 +622,7 @@
           "minute": "79",
           "scorer": "Pedri",
           "scorerId": 15,
-          "assist": "Dani Olmo",
+          "assist": "D. Olmo",
           "assistId": 17,
           "type": "goal"
         },
@@ -307,14 +631,15 @@
           "minute": "84",
           "scorer": "Lamine Yamal",
           "scorerId": 21,
-          "assist": "Dani Olmo",
+          "assist": "D. Olmo",
           "assistId": 17,
           "type": "goal"
         }
       ]
     },
     {
-      "providerId": null,
+      "providerId": 798835,
+      "providerLeagueId": 302,
       "status": "FT",
       "id": "fcb-rayo-2026",
       "date": "2026-08-31",
@@ -322,18 +647,19 @@
       "homeCode": "BAR",
       "away": "Rayo Vallecano",
       "awayCode": "RAY",
-      "homeScore": 5,
-      "awayScore": 2,
-      "venue": "Spotify Camp Nou",
+      "venue": "Camp Nou",
       "competition": "La Liga",
       "round": "Matchday 3",
+      "homeScore": 5,
+      "awayScore": 2,
+      "outcome": "W",
       "goals": [
         {
           "teamCode": "RAY",
           "minute": "12",
-          "scorer": "Sergio Camello",
+          "scorer": "S. Camello",
           "scorerId": null,
-          "assist": "Álvaro García",
+          "assist": "A. Garcia",
           "assistId": null,
           "type": "goal"
         },
@@ -342,8 +668,8 @@
           "minute": "19",
           "scorer": "Raphinha",
           "scorerId": 22,
-          "assist": "Xavi Espart",
-          "assistId": 7,
+          "assist": "X. Espart",
+          "assistId": null,
           "type": "goal"
         },
         {
@@ -351,25 +677,25 @@
           "minute": "21",
           "scorer": "Lamine Yamal",
           "scorerId": 21,
-          "assist": "Marc Bernal",
+          "assist": "M. Bernal",
           "assistId": 19,
           "type": "goal"
         },
         {
           "teamCode": "BAR",
           "minute": "51",
-          "scorer": "Florian Lejeune",
+          "scorer": "F. Lejeune (o.g.)",
           "scorerId": null,
           "assist": null,
           "assistId": null,
-          "type": "own-goal"
+          "type": "goal"
         },
         {
           "teamCode": "RAY",
           "minute": "59",
-          "scorer": "Sergio Camello",
+          "scorer": "S. Camello",
           "scorerId": null,
-          "assist": "Unai López",
+          "assist": "U. Lopez",
           "assistId": null,
           "type": "goal"
         },
@@ -378,8 +704,8 @@
           "minute": "71",
           "scorer": "Raphinha",
           "scorerId": 22,
-          "assist": "Anthony Gordon",
-          "assistId": 24,
+          "assist": "A. Gordon",
+          "assistId": null,
           "type": "goal"
         },
         {
@@ -387,26 +713,28 @@
           "minute": "90",
           "scorer": "Lamine Yamal",
           "scorerId": 21,
-          "assist": "Karim Adeyemi",
-          "assistId": 23,
+          "assist": "K. Adeyemi",
+          "assistId": null,
           "type": "goal"
         }
       ]
     },
     {
-      "providerId": null,
+      "providerId": 798815,
+      "providerLeagueId": 302,
       "status": "FT",
-      "id": "fcb-athletic-2026",
+      "id": "barcelona-ath-bilbao-2026-08-27",
       "date": "2026-08-27",
       "home": "Barcelona",
       "homeCode": "BAR",
-      "away": "Athletic Club",
-      "awayCode": "ATH",
-      "homeScore": 2,
-      "awayScore": 0,
-      "venue": "Spotify Camp Nou",
+      "away": "Ath Bilbao",
+      "awayCode": "ATB",
+      "venue": "Camp Nou",
       "competition": "La Liga",
       "round": "Matchday 1",
+      "homeScore": 2,
+      "awayScore": 0,
+      "outcome": "W",
       "goals": [
         {
           "teamCode": "BAR",
@@ -420,7 +748,7 @@
         {
           "teamCode": "BAR",
           "minute": "82",
-          "scorer": "Fermín López",
+          "scorer": "Fermin",
           "scorerId": 14,
           "assist": null,
           "assistId": null,
@@ -429,7 +757,8 @@
       ]
     },
     {
-      "providerId": null,
+      "providerId": 798823,
+      "providerLeagueId": 302,
       "status": "FT",
       "id": "elche-fcb-2026",
       "date": "2026-08-23",
@@ -437,11 +766,12 @@
       "homeCode": "ELC",
       "away": "Barcelona",
       "awayCode": "BAR",
-      "homeScore": 0,
-      "awayScore": 5,
       "venue": "Martínez Valero",
       "competition": "La Liga",
       "round": "Matchday 2",
+      "homeScore": 0,
+      "awayScore": 5,
+      "outcome": "W",
       "goals": [
         {
           "teamCode": "BAR",
@@ -455,8 +785,8 @@
         {
           "teamCode": "BAR",
           "minute": "45+3",
-          "scorer": "Karim Adeyemi",
-          "scorerId": 23,
+          "scorer": "K. Adeyemi",
+          "scorerId": null,
           "assist": "Raphinha",
           "assistId": 22,
           "type": "goal"
@@ -466,26 +796,26 @@
           "minute": "67",
           "scorer": "Raphinha",
           "scorerId": 22,
-          "assist": "Anthony Gordon",
-          "assistId": 24,
+          "assist": "A. Gordon",
+          "assistId": null,
           "type": "goal"
         },
         {
           "teamCode": "BAR",
           "minute": "71",
-          "scorer": "Fermín López",
+          "scorer": "Fermin",
           "scorerId": 14,
-          "assist": "Anthony Gordon",
-          "assistId": 24,
+          "assist": "A. Gordon",
+          "assistId": null,
           "type": "goal"
         },
         {
           "teamCode": "BAR",
           "minute": "79",
-          "scorer": "Fermín López",
+          "scorer": "Fermin",
           "scorerId": 14,
-          "assist": "Xavi Espart",
-          "assistId": 7,
+          "assist": "X. Espart",
+          "assistId": null,
           "type": "goal"
         }
       ]
@@ -493,11 +823,12 @@
   ],
   "fixtures": [
     {
-      "providerId": null,
+      "providerId": 798873,
+      "providerLeagueId": 302,
       "status": "NS",
       "id": "sevilla-fcb-2026",
       "date": "2026-09-19",
-      "kickoff": "2026-09-19T19:00:00Z",
+      "kickoff": "2026-09-19T19:00:00.000Z",
       "confirmed": true,
       "home": "Sevilla",
       "homeCode": "SEV",
@@ -508,164 +839,134 @@
       "round": "Matchday 7"
     },
     {
-      "providerId": null,
+      "providerId": 798877,
+      "providerLeagueId": 302,
       "status": "NS",
       "id": "fcb-getafe-2026",
       "date": "2026-10-10",
-      "kickoff": "2026-10-10T16:30:00Z",
+      "kickoff": "2026-10-10T16:30:00.000Z",
       "confirmed": true,
       "home": "Barcelona",
       "homeCode": "BAR",
       "away": "Getafe",
       "awayCode": "GET",
-      "venue": "Spotify Camp Nou",
+      "venue": "Camp Nou",
       "competition": "La Liga",
       "round": "Matchday 8"
     },
     {
-      "providerId": null,
+      "providerId": 853187,
+      "providerLeagueId": 3,
       "status": "NS",
       "id": "galatasaray-fcb-2026",
       "date": "2026-10-13",
-      "kickoff": "2026-10-13T19:00:00Z",
+      "kickoff": "2026-10-13T19:00:00.000Z",
       "confirmed": true,
       "home": "Galatasaray",
       "homeCode": "GAL",
       "away": "Barcelona",
       "awayCode": "BAR",
-      "venue": "RAMS Park",
+      "venue": "Rams Park",
       "competition": "Champions League",
       "round": "League phase · Matchday 2"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "betis-fcb-2026",
-      "date": "2026-10-18",
-      "kickoff": null,
-      "confirmed": false,
-      "home": "Real Betis",
-      "homeCode": "BET",
-      "away": "Barcelona",
-      "awayCode": "BAR",
-      "venue": "Estadio La Cartuja",
-      "competition": "La Liga",
-      "round": "Matchday 9"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "psg-fcb-2026",
-      "date": "2026-10-20",
-      "kickoff": "2026-10-20T19:00:00Z",
-      "confirmed": true,
-      "home": "Paris Saint-Germain",
-      "homeCode": "PSG",
-      "away": "Barcelona",
-      "awayCode": "BAR",
-      "venue": "Parc des Princes",
-      "competition": "Champions League",
-      "round": "League phase · Matchday 3"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "fcb-real-madrid-2026",
-      "date": "2026-10-25",
-      "kickoff": "2026-10-25T20:00:00Z",
-      "confirmed": true,
-      "home": "Barcelona",
-      "homeCode": "BAR",
-      "away": "Real Madrid",
-      "awayCode": "RMA",
-      "venue": "Spotify Camp Nou",
-      "competition": "La Liga",
-      "round": "Matchday 10 · El Clásico"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "fcb-alaves-2026",
-      "date": "2026-11-01",
-      "kickoff": null,
-      "confirmed": false,
-      "home": "Barcelona",
-      "homeCode": "BAR",
-      "away": "Alavés",
-      "awayCode": "ALA",
-      "venue": "Spotify Camp Nou",
-      "competition": "La Liga",
-      "round": "Matchday 11"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "fcb-villa-2026",
-      "date": "2026-11-03",
-      "kickoff": "2026-11-03T20:00:00Z",
-      "confirmed": true,
-      "home": "Barcelona",
-      "homeCode": "BAR",
-      "away": "Aston Villa",
-      "awayCode": "AVL",
-      "venue": "Spotify Camp Nou",
-      "competition": "Champions League",
-      "round": "League phase · Matchday 4"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "atleti-fcb-2026",
-      "date": "2026-11-08",
-      "kickoff": null,
-      "confirmed": false,
-      "home": "Atlético Madrid",
-      "homeCode": "ATM",
-      "away": "Barcelona",
-      "awayCode": "BAR",
-      "venue": "Riyadh Air Metropolitano",
-      "competition": "La Liga",
-      "round": "Matchday 12"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "sabah-fcb-2026",
-      "date": "2026-11-25",
-      "kickoff": "2026-11-25T17:45:00Z",
-      "confirmed": true,
-      "home": "Sabah",
-      "homeCode": "SAB",
-      "away": "Barcelona",
-      "awayCode": "BAR",
-      "venue": "Baku Olympic Stadium",
-      "competition": "Champions League",
-      "round": "League phase · Matchday 5"
-    },
-    {
-      "providerId": null,
-      "status": "NS",
-      "id": "fcb-man-city-2026",
-      "date": "2026-12-08",
-      "kickoff": "2026-12-08T20:00:00Z",
-      "confirmed": true,
-      "home": "Barcelona",
-      "homeCode": "BAR",
-      "away": "Manchester City",
-      "awayCode": "MCI",
-      "venue": "Spotify Camp Nou",
-      "competition": "Champions League",
-      "round": "League phase · Matchday 6"
     }
   ],
   "playerStats": [
     {
-      "playerId": 22,
+      "playerId": 2,
+      "appearances": 4,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": 4,
+      "appearances": 6,
+      "starts": 2,
+      "minutes": 210,
+      "goals": 1,
+      "assists": 1
+    },
+    {
+      "playerId": 5,
+      "appearances": 8,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 1
+    },
+    {
+      "playerId": 7,
+      "appearances": 5,
+      "starts": 5,
+      "minutes": 439,
+      "goals": 1,
+      "assists": 2
+    },
+    {
+      "playerId": 8,
+      "appearances": 4,
+      "starts": 4,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": 9,
+      "appearances": 12,
+      "starts": 5,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 1
+    },
+    {
+      "playerId": 10,
+      "appearances": 10,
+      "starts": 2,
+      "minutes": 0,
+      "goals": 2,
+      "assists": 1
+    },
+    {
+      "playerId": 14,
+      "appearances": 11,
+      "starts": 4,
+      "minutes": 391,
+      "goals": 6,
+      "assists": 4
+    },
+    {
+      "playerId": 15,
       "appearances": 7,
-      "starts": 7,
-      "minutes": 545,
-      "goals": 11,
+      "starts": 6,
+      "minutes": 474,
+      "goals": 1,
+      "assists": 2
+    },
+    {
+      "playerId": 17,
+      "appearances": 7,
+      "starts": 3,
+      "minutes": 330,
+      "goals": 0,
       "assists": 3
+    },
+    {
+      "playerId": 19,
+      "appearances": 7,
+      "starts": 3,
+      "minutes": 315,
+      "goals": 1,
+      "assists": 2
+    },
+    {
+      "playerId": 20,
+      "appearances": 3,
+      "starts": 0,
+      "minutes": 39,
+      "goals": 2,
+      "assists": 0
     },
     {
       "playerId": 21,
@@ -676,10 +977,18 @@
       "assists": 4
     },
     {
-      "playerId": 14,
-      "appearances": 6,
-      "starts": 4,
-      "minutes": 391,
+      "playerId": 22,
+      "appearances": 7,
+      "starts": 7,
+      "minutes": 545,
+      "goals": 11,
+      "assists": 3
+    },
+    {
+      "playerId": 23,
+      "appearances": 11,
+      "starts": 3,
+      "minutes": 294,
       "goals": 4,
       "assists": 2
     },
@@ -692,65 +1001,154 @@
       "assists": 4
     },
     {
-      "playerId": 23,
-      "appearances": 7,
-      "starts": 3,
-      "minutes": 294,
-      "goals": 3,
-      "assists": 2
-    },
-    {
-      "playerId": 7,
+      "playerId": 25,
       "appearances": 5,
-      "starts": 5,
-      "minutes": 439,
-      "goals": 1,
-      "assists": 2
-    },
-    {
-      "playerId": 15,
-      "appearances": 7,
-      "starts": 6,
-      "minutes": 474,
-      "goals": 1,
-      "assists": 2
-    },
-    {
-      "playerId": 19,
-      "appearances": 7,
-      "starts": 3,
-      "minutes": 315,
-      "goals": 0,
-      "assists": 2
-    },
-    {
-      "playerId": 17,
-      "appearances": 7,
-      "starts": 3,
-      "minutes": 330,
-      "goals": 0,
-      "assists": 3
-    },
-    {
-      "playerId": 20,
-      "appearances": 3,
       "starts": 0,
-      "minutes": 39,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 1
+    },
+    {
+      "playerId": 26,
+      "appearances": 2,
+      "starts": 0,
+      "minutes": 0,
       "goals": 2,
       "assists": 0
     },
     {
-      "playerId": 4,
+      "playerId": 27,
+      "appearances": 4,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-27944123",
+      "appearances": 0,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-116505656",
+      "appearances": 4,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-276789673",
+      "appearances": 0,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-948941149",
       "appearances": 6,
-      "starts": 2,
-      "minutes": 210,
-      "goals": 1,
-      "assists": 1
+      "starts": 0,
+      "minutes": 0,
+      "goals": 2,
+      "assists": 0
+    },
+    {
+      "playerId": "api-1197671428",
+      "appearances": 2,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-1809510962",
+      "appearances": 1,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-1900203716",
+      "appearances": 1,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-2087713209",
+      "appearances": 2,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-2089304468",
+      "appearances": 2,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-2147003450",
+      "appearances": 0,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-2463598333",
+      "appearances": 0,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
+    },
+    {
+      "playerId": "api-3589100860",
+      "appearances": 0,
+      "starts": 0,
+      "minutes": 0,
+      "goals": 0,
+      "assists": 0
     }
   ],
   "standings": [
     {
-      "providerLeagueId": 140,
+      "providerLeagueId": 3,
+      "id": "champions-league",
+      "competition": "Champions League",
+      "season": "2026/27",
+      "stage": "League phase · Matchday 1 of 8",
+      "position": 3,
+      "positionLabel": "3rd",
+      "totalTeams": 36,
+      "played": 1,
+      "wins": 1,
+      "draws": 0,
+      "losses": 0,
+      "goalsFor": 5,
+      "goalsAgainst": 1,
+      "goalDifference": 4,
+      "points": 3,
+      "form": [
+        "W"
+      ],
+      "standingLabel": "Direct round of 16 zone",
+      "standingNote": "Inside the league phase top eight",
+      "sourceLabel": "GOAL API standings",
+      "sourceUrl": "https://goal-api.com/coverage"
+    },
+    {
+      "providerLeagueId": 302,
       "id": "la-liga",
       "competition": "La Liga",
       "season": "2026/27",
@@ -775,33 +1173,8 @@
       ],
       "standingLabel": "League leaders",
       "standingNote": "3 points clear of Real Madrid",
-      "sourceLabel": "Official La Liga standings",
-      "sourceUrl": "https://www.fcbarcelona.com/en/football/first-team/standings"
-    },
-    {
-      "providerLeagueId": 2,
-      "id": "champions-league",
-      "competition": "Champions League",
-      "season": "2026/27",
-      "stage": "League phase · Matchday 1 of 8",
-      "position": 3,
-      "positionLabel": "3rd",
-      "totalTeams": 36,
-      "played": 1,
-      "wins": 1,
-      "draws": 0,
-      "losses": 0,
-      "goalsFor": 5,
-      "goalsAgainst": 1,
-      "goalDifference": 4,
-      "points": 3,
-      "form": [
-        "W"
-      ],
-      "standingLabel": "Direct round of 16 zone",
-      "standingNote": "Inside the league phase top eight",
-      "sourceLabel": "Official UEFA standings",
-      "sourceUrl": "https://www.uefa.com/uefachampionsleague/standings/"
+      "sourceLabel": "GOAL API standings",
+      "sourceUrl": "https://goal-api.com/coverage"
     }
   ]
 }
