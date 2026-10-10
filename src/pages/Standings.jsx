@@ -2,8 +2,8 @@ import { ArrowUpRight, ExternalLink, ShieldCheck, Sparkles, Target, Trophy } fro
 import CompetitionPill from '../components/CompetitionPill.jsx'
 import PageHeader from '../components/PageHeader.jsx'
 import TeamBadge from '../components/TeamBadge.jsx'
-import { standings, standingsCheckedAt } from '../data/standings.js'
-import { snapshotSeasonLabel } from '../data/snapshot.js'
+import { cupStatuses, standings, standingsCheckedAt } from '../data/standings.js'
+import { snapshot, snapshotSeasonLabel } from '../data/snapshot.js'
 
 const recordStats = [
   ['Played', 'played'],
@@ -164,7 +164,7 @@ export default function Standings() {
       <PageHeader
         eyebrow={`Men’s first team · ${snapshotSeasonLabel}`}
         title="Every table. One clear picture."
-        description="Barça’s live position across every active league competition, with form, points, and the numbers behind each standing."
+        description="Barça’s league positions and cup progress, with form, points, and the stage reached in each competition."
       />
 
       <div className="page-shell">
@@ -172,15 +172,43 @@ export default function Standings() {
           {standings.map((standing) => <StandingCard key={standing.id} standing={standing} />)}
         </div>
 
+        {cupStatuses.length > 0 && (
+          <section className="mt-10" aria-labelledby="cup-competitions">
+            <div className="section-heading">
+              <div>
+                <p className="eyebrow">Knockout competitions</p>
+                <h2 id="cup-competitions" className="section-title">Cup progress</h2>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-5 xl:grid-cols-2">
+              {cupStatuses.map((cup) => (
+                <article key={cup.id} className="rounded-3xl border border-white/8 bg-panel p-5 sm:p-7" aria-labelledby={`${cup.id}-status`}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <CompetitionPill competition={cup.competition} />
+                    <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-500">{cup.stage}</span>
+                  </div>
+                  <h3 id={`${cup.id}-status`} className="mt-5 font-display text-2xl font-black text-white">{cup.status}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-400">{cup.note}</p>
+                  <a href={cup.sourceUrl} target="_blank" rel="noreferrer" className="text-link mt-5">
+                    {cup.sourceLabel} <ExternalLink size={14} aria-hidden="true" />
+                  </a>
+                </article>
+              ))}
+            </div>
+          </section>
+        )}
+
         <div className="data-note mt-10">
           <div className="flex items-start gap-3">
             <ShieldCheck size={18} className="mt-0.5 shrink-0 text-gold" aria-hidden="true" />
             <div>
-              <p className="font-semibold text-slate-200">Standings checked {standingsCheckedAt}</p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">League tables can change after every match. Positions and qualification zones reflect the latest completed fixtures.</p>
+              <p className="font-semibold text-slate-200">Competition status checked {standingsCheckedAt}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">League positions reflect completed fixtures at the review date. Cup competitions show their stage and draw or match status.</p>
             </div>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">Automated provider data</span>
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-slate-600">
+            {snapshot.source?.name === 'manual-public-sources' ? 'Manually verified data' : 'Automated provider data'}
+          </span>
         </div>
       </div>
     </div>

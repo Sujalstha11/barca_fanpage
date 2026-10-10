@@ -13,9 +13,10 @@ import {
   resultsCheckedAt,
   resultSummary,
 } from '../data/results.js'
-import { snapshotSeasonLabel } from '../data/snapshot.js'
+import { snapshot, snapshotSeasonLabel } from '../data/snapshot.js'
 
 const locations = ['All', 'Home', 'Away']
+const manuallyReviewed = snapshot.source?.name === 'manual-public-sources'
 
 const statsWithPlayers = playerStats.map((stat) => ({
   ...stat,
@@ -207,11 +208,27 @@ export default function Results() {
         <div className="data-note mt-12">
           <div>
             <p className="font-semibold text-slate-200">Results and player stats checked {resultsCheckedAt}</p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">Competitive first-team matches only. Assist attribution can vary slightly between data providers.</p>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              {manuallyReviewed
+                ? 'Player totals combine official LaLiga and UEFA records. Published minutes may be rounded; the table includes players with published records. Competitive first-team matches only.'
+                : 'Competitive first-team matches only. Assist attribution can vary slightly between data providers.'}
+            </p>
           </div>
-          <a href="https://www.fcbarcelona.com/en/futbol/primer-equip/resultats" target="_blank" rel="noreferrer" className="text-link shrink-0">
-            Official results <ExternalLink size={14} />
-          </a>
+          <div className="flex flex-wrap gap-x-5 gap-y-3 sm:shrink-0 sm:flex-col lg:flex-row">
+            <a href="https://www.fcbarcelona.com/en/football/first-team/results" target="_blank" rel="noreferrer" className="text-link">
+              Official results <ExternalLink size={14} />
+            </a>
+            {manuallyReviewed && (
+              <>
+                <a href="https://www.laliga.com/en-GB/clubs/fc-barcelona/stats" target="_blank" rel="noreferrer" className="text-link">
+                  LaLiga stats <ExternalLink size={14} />
+                </a>
+                <a href="https://www.uefa.com/uefachampionsleague/clubs/50080--barcelona/squad/" target="_blank" rel="noreferrer" className="text-link">
+                  UEFA stats <ExternalLink size={14} />
+                </a>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

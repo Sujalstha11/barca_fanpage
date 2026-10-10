@@ -9,6 +9,7 @@
     "data:update": "node scripts/update-football-data.mjs --mode full",
     "data:update:scheduled": "node scripts/update-football-data.mjs --mode scheduled",
     "data:validate": "node scripts/validate-football-data.mjs",
+    "data:refresh:manual": "node scripts/refresh-manual-football-data.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --test test/*.test.mjs"

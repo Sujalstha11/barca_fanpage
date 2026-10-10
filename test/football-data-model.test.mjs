@@ -298,7 +298,8 @@ test('snapshot validation accepts the seed and rejects inconsistent player stati
   invalidShootout.results[0].outcome = 'W'
   assert.ok(snapshotValidationErrors(invalidShootout).some((message) => message.includes('decisive penalty-shootout score')))
 
-  invalidShootout.results[0].homePenaltyScore = 3
-  invalidShootout.results[0].awayPenaltyScore = 4
+  const barcelonaIsHome = invalidShootout.results[0].homeCode === 'BAR'
+  invalidShootout.results[0].homePenaltyScore = barcelonaIsHome ? 3 : 4
+  invalidShootout.results[0].awayPenaltyScore = barcelonaIsHome ? 4 : 3
   assert.ok(snapshotValidationErrors(invalidShootout).some((message) => message.includes('outcome must agree')))
 })

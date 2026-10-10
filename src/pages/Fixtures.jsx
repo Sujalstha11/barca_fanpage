@@ -83,7 +83,7 @@ export default function Fixtures() {
             <p className="font-semibold text-slate-200">Schedule checked {fixturesCheckedAt}</p>
             <p className="mt-1 text-xs leading-5 text-slate-500">Times and venues can change. Always confirm close to matchday.</p>
           </div>
-          <a href="https://www.fcbarcelona.com/en/futbol/primer-equipo/calendario" target="_blank" rel="noreferrer" className="text-link shrink-0">
+          <a href="https://www.fcbarcelona.com/en/football/first-team/schedule" target="_blank" rel="noreferrer" className="text-link shrink-0">
             Official schedule <ExternalLink size={14} />
           </a>
         </div>

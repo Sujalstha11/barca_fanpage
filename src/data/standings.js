@@ -11,4 +11,6 @@ export const standings = (Array.isArray(snapshot.standings) ? snapshot.standings
     form: normalizeForm(standing.form),
   }))
 
+export const cupStatuses = Array.isArray(snapshot.cupStatuses) ? snapshot.cupStatuses : []
+
 export const standingsCheckedAt = snapshotCheckedAt

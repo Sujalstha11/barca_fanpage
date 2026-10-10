@@ -1,22 +1,11 @@
-name: Update football data
+name: Update football data (manual API only)
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/update-football-data.yml'
-      - 'scripts/update-football-data.mjs'
-      - 'scripts/football-data/**'
-      - 'test/**'
-  schedule:
-    # Offset from the top of the hour to reduce scheduler congestion.
-    - cron: '7,37 * * * *'
-    - cron: '23 4 * * *'
+  # Automatic API updates are paused. Public-source snapshots are reviewed manually.
   workflow_dispatch:
     inputs:
       mode:
-        description: Update mode
+        description: Optional API update mode (requires a working key)
         required: true
         default: full
         type: choice
@@ -49,25 +38,6 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Select update mode
-        id: update-mode
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          EVENT_SCHEDULE: ${{ github.event.schedule }}
-          DISPATCH_MODE: ${{ inputs.mode }}
-        run: |
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            mode="$DISPATCH_MODE"
-          elif [[ "$EVENT_NAME" == "push" ]]; then
-            mode="full"
-          elif [[ "$EVENT_SCHEDULE" == "23 4 * * *" ]]; then
-            mode="full"
-          else
-            mode="scheduled"
-          fi
-          echo "mode=$mode" >> "$GITHUB_OUTPUT"
-
       - name: Run selected update
         id: update
         shell: bash
@@ -78,7 +48,7 @@ jobs:
           GOAL_API_SEASON: ${{ vars.FOOTBALL_DATA_SEASON || vars.GOAL_API_SEASON || '2026' }}
           API_FOOTBALL_KEY: ${{ secrets.API_FOOTBALL_KEY }}
           API_FOOTBALL_SEASON: ${{ vars.API_FOOTBALL_SEASON || vars.FOOTBALL_DATA_SEASON || vars.GOAL_API_SEASON || '2026' }}
-          UPDATE_MODE: ${{ steps.update-mode.outputs.mode }}
+          UPDATE_MODE: ${{ inputs.mode }}
         run: |
           if [[ "$UPDATE_MODE" == "full" ]]; then
             npm run data:update
